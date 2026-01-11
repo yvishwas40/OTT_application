@@ -1,0 +1,163 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  role      UserRole @default(VIEWER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Program {
+  id                   String        @id @default(uuid()) @db.Uuid
+  title                String
+  description          String?
+  languagePrimary      String        @map("language_primary")
+  languagesAvailable   String[]      @map("languages_available")
+  status               ContentStatus @default(DRAFT)
+  publishedAt          DateTime?     @map("published_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  terms         Term[]
+  topics        ProgramTopic[]
+  assets        ProgramAsset[]
+
+  @@index([status])
+  @@index([languagePrimary])
+  @@map("programs")
+}
+
+model Topic {
+  id       String   @id @default(uuid()) @db.Uuid
+  name     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  programs ProgramTopic[]
+
+  @@map("topics")
+}
+
+model ProgramTopic {
+  programId String  @map("program_id") @db.Uuid
+  topicId   String  @map("topic_id") @db.Uuid
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  topic     Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([programId, topicId])
+  @@index([programId])
+  @@index([topicId])
+  @@map("program_topics")
+}
+
+model Term {
+  id         String   @id @default(uuid()) @db.Uuid
+  programId  String   @map("program_id") @db.Uuid
+  termNumber Int      @map("term_number")
+  title      String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  program Program  @relation(fields: [programId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@unique([programId, termNumber])
+  @@index([programId])
+  @@map("terms")
+}
+
+model Lesson {
+  id                         String        @id @default(uuid()) @db.Uuid
+  termId                     String        @map("term_id") @db.Uuid
+  lessonNumber               Int           @map("lesson_number")
+  title                      String
+  contentType                ContentType   @map("content_type")
+  durationMs                 Int?          @map("duration_ms")
+  isPaid                     Boolean       @default(false) @map("is_paid")
+  contentLanguagePrimary     String        @map("content_language_primary")
+  contentLanguagesAvailable  String[]      @map("content_languages_available")
+  contentUrlsByLanguage      Json          @map("content_urls_by_language")
+  subtitleLanguages          String[]      @default([]) @map("subtitle_languages")
+  subtitleUrlsByLanguage     Json          @default("{}") @map("subtitle_urls_by_language")
+  status                     ContentStatus @default(DRAFT)
+  publishAt                  DateTime?     @map("publish_at")
+  publishedAt                DateTime?     @map("published_at")
+  createdAt                  DateTime      @default(now()) @map("created_at")
+  updatedAt                  DateTime      @updatedAt @map("updated_at")
+
+  term   Term           @relation(fields: [termId], references: [id], onDelete: Cascade)
+  assets LessonAsset[]
+
+  @@unique([termId, lessonNumber])
+  @@index([termId])
+  @@index([status])
+  @@index([publishAt])
+  @@map("lessons")
+}
+
+enum ContentType {
+  VIDEO
+  ARTICLE
+}
+
+enum ContentStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AssetVariant {
+  PORTRAIT
+  LANDSCAPE
+  SQUARE
+  BANNER
+}
+
+model ProgramAsset {
+  id        String       @id @default(uuid()) @db.Uuid
+  programId String       @map("program_id") @db.Uuid
+  language  String
+  variant   AssetVariant
+  assetType String       @map("asset_type")
+  url       String
+
+  program Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  @@unique([programId, language, variant, assetType])
+  @@index([programId])
+  @@map("program_assets")
+}
+
+model LessonAsset {
+  id        String       @id @default(uuid()) @db.Uuid
+  lessonId  String       @map("lesson_id") @db.Uuid
+  language  String
+  variant   AssetVariant
+  assetType String       @map("asset_type")
+  url       String
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, language, variant, assetType])
+  @@index([lessonId])
+  @@map("lesson_assets")
+}

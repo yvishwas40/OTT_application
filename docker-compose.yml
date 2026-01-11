@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ott_cms
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./packages/api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ott_cms?schema=public
+      JWT_SECRET: dev-secret
+      PORT: 3000
+      CMS_URL: http://cms:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  cms:
+    build:
+      context: ./packages/cms
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000/api
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+
+  worker:
+    build:
+      context: .
+      dockerfile: packages/worker/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ott_cms?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
