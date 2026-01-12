@@ -34,20 +34,21 @@ The system follows a microservices-inspired monolithic structure (Monorepo) mana
 
 ```mermaid
 graph TD
-    UserClient[📱 End User Apps] -->|REST API| API
-    Admin[👨‍💻 Content Editor] -->|HTTPS| CMS
-    
-    subgraph "OTT Platform Infrastructure"
+    UserClient[End User Apps] -->|REST API| APIService
+    Admin[Content Editor] -->|HTTPS| CMS
+
+    subgraph OTT["OTT Platform Infrastructure"]
         direction TB
-        CMS[🖥️ CMS Dashboard] -->|Manage Content| API[⚙️ Backend API Service]
-        API -->|Read/Write| DB[(🐘 Postgres Database)]
-        Worker[🤖 Background Worker] -->|Poll Schedule| DB
+        CMS[CMS Dashboard] -->|Manage Content| APIService[Backend API Service]
+        APIService -->|Read / Write| DB[(Postgres Database)]
+        Worker[Background Worker] -->|Poll Schedule| DB
     end
 
     style CMS fill:#eff,stroke:#333,stroke-width:2px
-    style API fill:#ffe,stroke:#333,stroke-width:2px
+    style APIService fill:#ffe,stroke:#333,stroke-width:2px
     style Worker fill:#fef,stroke:#333,stroke-width:2px
     style DB fill:#eee,stroke:#333,stroke-width:2px
+
 ```
 
 ### 2. Publishing Workflow (Sequence Diagram)
