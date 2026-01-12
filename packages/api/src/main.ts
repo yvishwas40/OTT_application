@@ -45,34 +45,19 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ GLOBAL CORS (ALLOW ALL)
   app.enableCors({
     origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // ✅ FORCE OPTIONS SUCCESS
-  app.use((req, res, next) => {
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(204);
-    } else {
-      next();
-    }
+  // ✅ Force OPTIONS to succeed (CRITICAL)
+  app.getHttpAdapter().getInstance().options('*', (req, res) => {
+    res.sendStatus(204);
   });
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
 
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
+  await app.listen(process.env.PORT || 3000);
 }
-
