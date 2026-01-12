@@ -7,11 +7,11 @@ type ContentType = 'VIDEO' | 'ARTICLE';
 
 @Injectable()
 export class LessonsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(termId?: string) {
     const where = termId ? { termId } : {};
-    
+
     return this.prisma.lesson.findMany({
       where,
       include: {
@@ -57,9 +57,13 @@ export class LessonsService {
     // Validate content constraints
     this.validateLessonData(data);
 
+    // Remove assets from data to avoid Prisma validation error
+    // Assets must be created via the AssetsController
+    const { assets, ...lessonData } = data;
+
     return this.prisma.lesson.create({
       data: {
-        ...data,
+        ...lessonData,
         status: 'DRAFT',
       },
       include: {
@@ -79,7 +83,7 @@ export class LessonsService {
     }
 
     const lesson = await this.findOne(id);
-    
+
     // Validate content constraints
     if (data.contentType || data.durationMs || data.contentLanguagePrimary || data.contentLanguagesAvailable) {
       this.validateLessonData({ ...lesson, ...data });
@@ -105,7 +109,7 @@ export class LessonsService {
     }
 
     const lesson = await this.findOne(id);
-    
+
     // Validate publishing requirements
     await this.validatePublishing(id);
 
@@ -132,7 +136,7 @@ export class LessonsService {
     }
 
     const lesson = await this.findOne(id);
-    
+
     // Validate publishing requirements
     await this.validatePublishing(id);
 
@@ -211,7 +215,7 @@ export class LessonsService {
 
   private async validatePublishing(lessonId: string): Promise<void> {
     const lesson = await this.findOne(lessonId);
-    
+
     // Check required assets for primary content language
     const requiredAssets = await this.prisma.lessonAsset.findMany({
       where: {

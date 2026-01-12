@@ -74,6 +74,7 @@ model Term {
   programId  String   @map("program_id") @db.Uuid
   termNumber Int      @map("term_number")
   title      String?
+  description String? 
   createdAt  DateTime @default(now()) @map("created_at")
 
   program Program  @relation(fields: [programId], references: [id], onDelete: Cascade)

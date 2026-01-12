@@ -1,23 +1,42 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CMSLayout } from '../../../components/CMSLayout';
 import { api } from '../../../lib/api';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save, X, Tag } from 'lucide-react';
 
 export default function CreateSeriesPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Topics state
+  const [topics, setTopics] = useState<any[]>([]);
+  const [selectedTopicIds, setSelectedTopicIds] = useState<string[]>([]);
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     languagePrimary: 'en',
     languagesAvailable: ['en'],
-    posterUrl: ''
+    posterUrl: '', // Portrait
+    landscapePosterUrl: '' // Landscape
   });
+
+  useEffect(() => {
+    fetchTopics();
+  }, []);
+
+  const fetchTopics = async () => {
+    try {
+      const response = await api.get('/topics');
+      setTopics(response.data);
+    } catch (error) {
+      console.error('Failed to fetch topics:', error);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +57,12 @@ export default function CreateSeriesPage() {
         return;
       }
 
+      if (selectedTopicIds.length === 0) {
+        setError('At least one topic is required');
+        setLoading(false);
+        return;
+      }
+
       // Ensure primary language is in available languages
       const languagesAvailable = formData.languagesAvailable.includes(formData.languagePrimary)
         ? formData.languagesAvailable
@@ -48,21 +73,36 @@ export default function CreateSeriesPage() {
         description: formData.description.trim() || null,
         languagePrimary: formData.languagePrimary,
         languagesAvailable: languagesAvailable,
+        topicIds: selectedTopicIds
       });
 
-      // Add Poster if provided
+      // Add Portrait Poster if provided
       if (formData.posterUrl) {
         try {
           await api.post('/assets/programs', {
             programId: response.data.id,
             language: formData.languagePrimary,
-            variant: 'PORTRAIT', // Default to Portrait
+            variant: 'PORTRAIT',
             assetType: 'poster',
             url: formData.posterUrl
           });
         } catch (assetError) {
-          console.error('Failed to add poster:', assetError);
-          // Don't fail the whole creation clearly, but user might notice missing poster
+          console.error('Failed to add portrait poster:', assetError);
+        }
+      }
+
+      // Add Landscape Poster if provided
+      if (formData.landscapePosterUrl) {
+        try {
+          await api.post('/assets/programs', {
+            programId: response.data.id,
+            language: formData.languagePrimary,
+            variant: 'LANDSCAPE',
+            assetType: 'poster',
+            url: formData.landscapePosterUrl
+          });
+        } catch (assetError) {
+          console.error('Failed to add landscape poster:', assetError);
         }
       }
 
@@ -93,6 +133,14 @@ export default function CreateSeriesPage() {
       });
     }
     setError('');
+  };
+
+  const toggleTopic = (topicId: string) => {
+    if (selectedTopicIds.includes(topicId)) {
+      setSelectedTopicIds(selectedTopicIds.filter(id => id !== topicId));
+    } else {
+      setSelectedTopicIds([...selectedTopicIds, topicId]);
+    }
   };
 
   const availableLanguages = ['en', 'es', 'fr', 'te', 'hi']; // Including Telugu for Chai Shorts
@@ -155,21 +203,66 @@ export default function CreateSeriesPage() {
                 />
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Portrait Poster URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.posterUrl}
+                    onChange={(e) => setFormData({ ...formData, posterUrl: e.target.value })}
+                    className="input-field"
+                    placeholder="https://example.com/poster_portrait.jpg"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Vertical poster (2:3) for lists and cards.
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Landscape Poster URL (Optional)
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.landscapePosterUrl}
+                    onChange={(e) => setFormData({ ...formData, landscapePosterUrl: e.target.value })}
+                    className="input-field"
+                    placeholder="https://example.com/poster_landscape.jpg"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Horizontal poster (16:9) for feature banners.
+                  </p>
+                </div>
+              </div>
+
+              {/* Topics Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Poster URL (Optional)
+                  Topics <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="url"
-                  value={formData.posterUrl}
-                  onChange={(e) => setFormData({ ...formData, posterUrl: e.target.value })}
-                  className="input-field"
-                  placeholder="https://example.com/poster.jpg"
-                  disabled={loading}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Primary poster for the series ({formData.languagePrimary}). Landscape or Portrait.
-                </p>
+                <div className="flex flex-wrap gap-2 p-3 bg-slate-900/50 rounded-lg border border-slate-700 min-h-[3rem]">
+                  {topics.map((topic) => (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      onClick={() => toggleTopic(topic.id)}
+                      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-all ${selectedTopicIds.includes(topic.id)
+                          ? 'bg-yellow-600 border-yellow-500 text-white'
+                          : 'bg-slate-800 border-slate-600 text-gray-400 hover:border-gray-500 hover:text-gray-300'
+                        }`}
+                    >
+                      <Tag className="h-3 w-3" />
+                      {topic.name}
+                    </button>
+                  ))}
+                  {topics.length === 0 && (
+                    <p className="text-xs text-gray-500">No topics available.</p>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Select at least one topic.</p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -261,7 +354,7 @@ export default function CreateSeriesPage() {
         <div className="card p-4 bg-yellow-900/20 border border-yellow-900/50">
           <p className="text-sm text-yellow-400">
             <strong>Note:</strong> The series will be created as a <strong>Draft</strong>.
-            After creating, you can add posters, episodes, and then publish it to make it visible on the OTT platform.
+            After creating, you can add more assets, episodes, and then publish it to make it visible on the OTT platform.
           </p>
         </div>
       </div>

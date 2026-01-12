@@ -62,11 +62,46 @@ export default function CMSProgramsPage() {
   };
 
   const getPosterUrl = (program: any) => {
-    const asset = program.assets?.find((a: any) =>
+    if (!program.assets || program.assets.length === 0) {
+      return 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=400';
+    }
+
+    // 1. Strict Match: Poster + Portrait + Primary Language
+    let asset = program.assets.find((a: any) =>
       a.assetType === 'poster' &&
       a.variant === 'PORTRAIT' &&
       a.language === program.languagePrimary
     );
+
+    // 2. Fallback: Poster + Portrait + English
+    if (!asset) {
+      asset = program.assets.find((a: any) =>
+        a.assetType === 'poster' &&
+        a.variant === 'PORTRAIT' &&
+        a.language === 'en'
+      );
+    }
+
+    // 3. Fallback: Poster + Portrait + Any Language
+    if (!asset) {
+      asset = program.assets.find((a: any) =>
+        a.assetType === 'poster' &&
+        a.variant === 'PORTRAIT'
+      );
+    }
+
+    // 4. Fallback: Any Portrait Image (Thumbnail)
+    if (!asset) {
+      asset = program.assets.find((a: any) =>
+        a.variant === 'PORTRAIT'
+      );
+    }
+
+    // 5. Last Resort: Any Image
+    if (!asset) {
+      asset = program.assets[0];
+    }
+
     return asset?.url || 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=400';
   };
 

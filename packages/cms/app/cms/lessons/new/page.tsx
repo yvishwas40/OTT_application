@@ -26,7 +26,8 @@ export default function CreateEpisodePage() {
     contentLanguagePrimary: 'en',
     contentLanguagesAvailable: ['en'],
     contentUrl: '',
-    thumbnailUrl: '',
+    thumbnailUrl: '', // Landscape
+    portraitThumbnailUrl: '', // Portrait
     subtitleUrl: '',
     shouldPublish: true
   });
@@ -40,7 +41,8 @@ export default function CreateEpisodePage() {
       // Extract programId from term
       const term = terms.find(t => t.id === formData.termId);
       if (term) {
-        fetchTerms(term.programId);
+        fetchTerms(term.programId); // Wait, this logic seems recursive or odd if it expects programId from term to fetch terms...
+        // Actually the code: fetchTerms(term.programId) fetches all terms of that program, which is correct for context switch.
       }
     }
   }, [formData.termId]);
@@ -135,7 +137,7 @@ export default function CreateEpisodePage() {
         publishedAt: formData.shouldPublish ? new Date().toISOString() : null
       });
 
-      // Add Thumbnail if provided
+      // Add Landscape Thumbnail if provided
       if (formData.thumbnailUrl) {
         try {
           await api.post('/assets/lessons', {
@@ -146,7 +148,22 @@ export default function CreateEpisodePage() {
             url: formData.thumbnailUrl
           });
         } catch (assetError) {
-          console.error('Failed to add thumbnail', assetError);
+          console.error('Failed to add landscape thumbnail', assetError);
+        }
+      }
+
+      // Add Portrait Thumbnail if provided
+      if (formData.portraitThumbnailUrl) {
+        try {
+          await api.post('/assets/lessons', {
+            lessonId: response.data.id,
+            language: formData.contentLanguagePrimary,
+            variant: 'PORTRAIT',
+            assetType: 'thumbnail',
+            url: formData.portraitThumbnailUrl
+          });
+        } catch (assetError) {
+          console.error('Failed to add portrait thumbnail', assetError);
         }
       }
 
@@ -369,17 +386,35 @@ export default function CreateEpisodePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
-                    Thumbnail URL
+                    Landscape Thumbnail URL
                   </label>
                   <input
                     type="url"
                     value={formData.thumbnailUrl}
                     onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
                     className="input-field"
-                    placeholder="https://example.com/thumb.jpg"
+                    placeholder="https://example.com/thumb_landscape.jpg"
                     disabled={loading}
                   />
+                  <p className="text-xs text-gray-500 mt-1">16:9 ratio (e.g., 1920x1080)</p>
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-400 mb-2">
+                    Portrait Thumbnail URL
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.portraitThumbnailUrl}
+                    onChange={(e) => setFormData({ ...formData, portraitThumbnailUrl: e.target.value })}
+                    className="input-field"
+                    placeholder="https://example.com/thumb_portrait.jpg"
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">2:3 ratio (e.g., 1000x1500)</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 pt-2">
                 <div>
                   <label className="block text-sm font-medium text-gray-400 mb-2">
                     Subtitle URL (VTT)
@@ -395,7 +430,7 @@ export default function CreateEpisodePage() {
                 </div>
               </div>
 
-              <div className="bg-slate-800 p-4 rounded border border-slate-700">
+              <div className="bg-slate-800 p-4 rounded border border-slate-700 mt-4">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"

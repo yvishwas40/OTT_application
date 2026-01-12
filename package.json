@@ -24,7 +24,11 @@
   "devDependencies": {
     "@types/node": "^25.0.6",
     "concurrently": "^8.2.2",
+    "prisma": "^7.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0"
   }
 }

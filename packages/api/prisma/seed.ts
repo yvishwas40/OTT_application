@@ -3,19 +3,53 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-/**
- * Chai Shorts Seed
- * Programs  -> Short Series
- * Terms     -> Seasons
- * Lessons   -> Episodes (2 minutes)
- */
+const seriesData = [
+  {
+    title: 'Pelli Gola',
+    desc: 'A light-hearted Telugu relationship drama on modern marriage.',
+    genre: 'Romance',
+  },
+  {
+    title: 'Software DevLOVEper',
+    desc: 'Love, bugs, and deadlines in a software engineer’s life.',
+    genre: 'Comedy',
+  },
+  {
+    title: 'Gulf Love Story',
+    desc: 'A touching long-distance love story across countries.',
+    genre: 'Romance',
+  },
+  {
+    title: 'Middle Class Madhu',
+    desc: 'Comedy-drama about dreams, money, and middle-class emotions.',
+    genre: 'Comedy',
+  },
+  {
+    title: 'MBA Meme School',
+    desc: 'MBA campus life told through humor and memes.',
+    genre: 'Comedy',
+  },
+  {
+    title: 'The Software Story',
+    desc: 'Reality of IT life, office politics, and personal growth.',
+    genre: 'Drama',
+  },
+  {
+    title: 'Engineering Girls – Telugu Version',
+    desc: 'Engineering life through the perspective of young women.',
+    genre: 'Comedy',
+  },
+  {
+    title: 'College Diaries (Telugu)',
+    desc: 'Friendship, love, exams, and unforgettable college memories.',
+    genre: 'Romance',
+  },
+];
 
 async function main() {
   console.log('🌱 Seeding Chai Shorts database...');
 
-  /* ----------------------------------------------------
-   * USERS (CMS)
-   * -------------------------------------------------- */
+  // 1. Users
   const adminPassword = await bcrypt.hash('admin123', 10);
   const editorPassword = await bcrypt.hash('editor123', 10);
 
@@ -39,228 +73,108 @@ async function main() {
     },
   });
 
-  /* ----------------------------------------------------
-   * TOPICS / GENRES
-   * -------------------------------------------------- */
-  const romance = await prisma.topic.upsert({
-    where: { name: 'Romance' },
-    update: {},
-    create: { name: 'Romance' },
-  });
+  // 2. Topics
+  const topics = ['Romance', 'Comedy', 'Thriller', 'Drama'];
+  const topicMap = new Map();
 
-  const comedy = await prisma.topic.upsert({
-    where: { name: 'Comedy' },
-    update: {},
-    create: { name: 'Comedy' },
-  });
+  for (const name of topics) {
+    const topic = await prisma.topic.upsert({
+      where: { name },
+      update: {},
+      create: { name },
+    });
+    topicMap.set(name, topic.id);
+  }
 
-  const thriller = await prisma.topic.upsert({
-    where: { name: 'Thriller' },
-    update: {},
-    create: { name: 'Thriller' },
-  });
+  // 3. Programs, Seasons, Episodes, Assets
+  for (const series of seriesData) {
+    // Create Program
+    const program = await prisma.program.create({
+      data: {
+        title: series.title,
+        description: series.desc,
+        languagePrimary: 'te',
+        languagesAvailable: ['te'],
+        status: 'PUBLISHED',
+        publishedAt: new Date(),
+        topics: {
+          create: { topicId: topicMap.get(series.genre) || topicMap.get('Comedy') },
+        },
+      },
+    });
 
-  /* ----------------------------------------------------
-   * SERIES (PROGRAMS)
-   * -------------------------------------------------- */
+    // Program Assets
+    await prisma.programAsset.createMany({
+      data: [
+        {
+          programId: program.id,
+          language: 'te',
+          variant: 'PORTRAIT',
+          assetType: 'poster',
+          url: 'https://images.pexels.com/photos/3617500/pexels-photo-3617500.jpeg',
+        },
+        {
+          programId: program.id,
+          language: 'te',
+          variant: 'LANDSCAPE',
+          assetType: 'poster',
+          url: 'https://images.pexels.com/photos/3617512/pexels-photo-3617512.jpeg',
+        },
+      ],
+    });
 
-  const chaiLove = await prisma.program.create({
-    data: {
-      title: 'Chai Lo Oka Love Story',
-      description:
-        'A tender Telugu short series about unexpected love brewed over evening chai.',
-      languagePrimary: 'te',
-      languagesAvailable: ['te', 'en'],
-      status: 'PUBLISHED',
-      publishedAt: new Date(),
-      topics: {
-        create: [{ topicId: romance.id }],
+    // Create Season
+    const season = await prisma.term.create({
+      data: {
+        programId: program.id,
+        termNumber: 1,
+        title: 'Season 1',
       },
-    },
-  });
+    });
 
-  const lateNight = await prisma.program.create({
-    data: {
-      title: 'Last Bus Stop',
-      description:
-        'A thriller that unfolds during late-night bus rides and quiet conversations.',
-      languagePrimary: 'te',
-      languagesAvailable: ['te'],
-      status: 'DRAFT',
-      topics: {
-        create: [{ topicId: thriller.id }],
-      },
-    },
-  });
+    // Create 3 Episodes
+    for (let i = 1; i <= 3; i++) {
+      const lesson = await prisma.lesson.create({
+        data: {
+          termId: season.id,
+          lessonNumber: i,
+          title: `Episode ${i} – ${series.title}`,
+          contentType: 'VIDEO',
+          durationMs: 120000, // 2 minutes
+          isPaid: false,
+          contentLanguagePrimary: 'te',
+          contentLanguagesAvailable: ['te'],
+          contentUrlsByLanguage: {
+            te: `https://example.com/video/${program.id}_ep${i}.mp4`,
+          },
+          status: 'PUBLISHED',
+          publishedAt: new Date(),
+        }
+      });
 
-  /* ----------------------------------------------------
-   * SERIES POSTERS
-   * -------------------------------------------------- */
-  await prisma.programAsset.createMany({
-    data: [
-      {
-        programId: chaiLove.id,
-        language: 'te',
-        variant: 'PORTRAIT',
-        assetType: 'poster',
-        url: 'https://images.pexels.com/photos/3617500/pexels-photo-3617500.jpeg',
-      },
-      {
-        programId: chaiLove.id,
-        language: 'te',
-        variant: 'LANDSCAPE',
-        assetType: 'poster',
-        url: 'https://images.pexels.com/photos/3617512/pexels-photo-3617512.jpeg',
-      },
-      {
-        programId: lateNight.id,
-        language: 'te',
-        variant: 'PORTRAIT',
-        assetType: 'poster',
-        url: 'https://images.pexels.com/photos/713149/pexels-photo-713149.jpeg',
-      },
-      {
-        programId: lateNight.id,
-        language: 'te',
-        variant: 'LANDSCAPE',
-        assetType: 'poster',
-        url: 'https://images.pexels.com/photos/713150/pexels-photo-713150.jpeg',
-      },
-    ],
-  });
-
-  /* ----------------------------------------------------
-   * SEASONS (TERMS)
-   * -------------------------------------------------- */
-  const chaiSeason1 = await prisma.term.create({
-    data: {
-      programId: chaiLove.id,
-      termNumber: 1,
-      title: 'Season 1',
-    },
-  });
-
-  const nightSeason1 = await prisma.term.create({
-    data: {
-      programId: lateNight.id,
-      termNumber: 1,
-      title: 'Season 1',
-    },
-  });
-
-  /* ----------------------------------------------------
-   * EPISODES (LESSONS) – 2 MINUTES EACH
-   * -------------------------------------------------- */
-
-  const ep1 = await prisma.lesson.create({
-    data: {
-      termId: chaiSeason1.id,
-      lessonNumber: 1,
-      title: 'First Sip',
-      contentType: 'VIDEO',
-      durationMs: 120000,
-      isPaid: false,
-      contentLanguagePrimary: 'te',
-      contentLanguagesAvailable: ['te', 'en'],
-      contentUrlsByLanguage: {
-        te: 'https://example.com/chai/ep1-te.mp4',
-        en: 'https://example.com/chai/ep1-en.mp4',
-      },
-      status: 'PUBLISHED',
-      publishedAt: new Date(),
-    },
-  });
-
-  const ep2 = await prisma.lesson.create({
-    data: {
-      termId: chaiSeason1.id,
-      lessonNumber: 2,
-      title: 'Silent Glance',
-      contentType: 'VIDEO',
-      durationMs: 115000,
-      isPaid: false,
-      contentLanguagePrimary: 'te',
-      contentLanguagesAvailable: ['te'],
-      contentUrlsByLanguage: {
-        te: 'https://example.com/chai/ep2-te.mp4',
-      },
-      status: 'PUBLISHED',
-      publishedAt: new Date(),
-    },
-  });
-
-  const ep3 = await prisma.lesson.create({
-    data: {
-      termId: chaiSeason1.id,
-      lessonNumber: 3,
-      title: 'Unspoken Words',
-      contentType: 'VIDEO',
-      durationMs: 125000,
-      isPaid: true,
-      contentLanguagePrimary: 'te',
-      contentLanguagesAvailable: ['te'],
-      contentUrlsByLanguage: {
-        te: 'https://example.com/chai/ep3-te.mp4',
-      },
-      status: 'SCHEDULED',
-      publishAt: new Date(Date.now() + 2 * 60 * 1000),
-    },
-  });
-
-  /* ----------------------------------------------------
-   * THUMBNAILS
-   * -------------------------------------------------- */
-  await prisma.lessonAsset.createMany({
-    data: [
-      {
-        lessonId: ep1.id,
-        language: 'te',
-        variant: 'PORTRAIT',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg',
-      },
-      {
-        lessonId: ep1.id,
-        language: 'te',
-        variant: 'LANDSCAPE',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/1525042/pexels-photo-1525042.jpeg',
-      },
-      {
-        lessonId: ep2.id,
-        language: 'te',
-        variant: 'PORTRAIT',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/3772622/pexels-photo-3772622.jpeg',
-      },
-      {
-        lessonId: ep2.id,
-        language: 'te',
-        variant: 'LANDSCAPE',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/3772623/pexels-photo-3772623.jpeg',
-      },
-      {
-        lessonId: ep3.id,
-        language: 'te',
-        variant: 'PORTRAIT',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/713148/pexels-photo-713148.jpeg',
-      },
-      {
-        lessonId: ep3.id,
-        language: 'te',
-        variant: 'LANDSCAPE',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/713147/pexels-photo-713147.jpeg',
-      },
-    ],
-  });
+      // Lesson Assets (Thumbnails)
+      await prisma.lessonAsset.createMany({
+        data: [
+          {
+            lessonId: lesson.id,
+            language: 'te',
+            variant: 'PORTRAIT',
+            assetType: 'thumbnail',
+            url: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg',
+          },
+          {
+            lessonId: lesson.id,
+            language: 'te',
+            variant: 'LANDSCAPE',
+            assetType: 'thumbnail',
+            url: 'https://images.pexels.com/photos/1525042/pexels-photo-1525042.jpeg',
+          }
+        ]
+      });
+    }
+  }
 
   console.log('✅ Chai Shorts database seeded successfully!');
-  console.log('👤 Admin: admin@chaishorts.com / admin123');
-  console.log('👤 Editor: editor@chaishorts.com / editor123');
-  console.log('⏱️ One episode will auto-publish in ~2 minutes');
 }
 
 main()
