@@ -28,3 +28,4 @@ EXPOSE 3000
 
 # 8. Run compiled app
 CMD ["node", "dist/src/main.js"]
+
