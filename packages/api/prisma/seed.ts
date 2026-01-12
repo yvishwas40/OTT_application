@@ -104,24 +104,41 @@ async function main() {
     });
 
     // Program Assets
-    await prisma.programAsset.createMany({
-      data: [
-        {
-          programId: program.id,
-          language: 'te',
-          variant: 'PORTRAIT',
-          assetType: 'poster',
-          url: 'https://images.pexels.com/photos/3617500/pexels-photo-3617500.jpeg',
-        },
-        {
-          programId: program.id,
-          language: 'te',
-          variant: 'LANDSCAPE',
-          assetType: 'poster',
-          url: 'https://images.pexels.com/photos/3617512/pexels-photo-3617512.jpeg',
-        },
-      ],
-    });
+    const posterMap: Record<string, { portrait: string; landscape: string }> = {
+    'Pelli Gola': {
+      portrait: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT5jL8n6KJMSAdymVKQwq5AcN6aqvw9wCY3hQ&s',
+      landscape: 'https://d2zub9v50g8scn.cloudfront.net/yupptv/Movies/yupp/1080x400/Pelli_Gola_254X191.jpg',
+    },
+    'Software DevLOVEper': {
+      portrait: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSSrDXhwBi9-midfUSgY2ANHX1Lzn25vLvPbQ&s',
+      landscape: 'https://i.ytimg.com/vi/ZvISbJNSolg/hq720.jpg?sqp=-oaymwEXCK4FEIIDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLBy2i8sbYVAWVMG0m7nU_2iDBhjoA',
+    },
+    'Gulf Love Story': {
+      portrait: 'https://filmfreeway-production-storage-01-connector.filmfreeway.com/press_kits/posters/002/285/714/original/bf2756b508-poster.jpg?1677263627',
+      landscape: 'https://static.toiimg.com/thumb/msid-59131037,width-400,resizemode-4/59131037.jpg',
+    },
+    'Middle Class Madhu': {
+      portrait: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrtgWwjGw9DDqcNxTAcSmcg3F3ciORjtD1vw&s',
+      landscape: 'https://i.ytimg.com/vi/VBif6erzdc8/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLBOJKfoemrM4zcqTrmhefr8p1qFYg',
+    },
+    'MBA Meme School': {
+      portrait: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDjLlokIkoFqUyLYlcLWR50gFqU_7o8WIHoQ&s',
+      landscape: 'https://i.ytimg.com/vi/Yo_7ngJvcTs/maxresdefault.jpg',
+    },
+    'The Software Story': {
+      portrait: 'https://i.ytimg.com/vi/yp7zd1GqM4M/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLANpZ0E-w7osry1f4OAmMGYneg-XA',
+      landscape: 'https://i.ytimg.com/vi/cO6lmuw0mHg/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLCt8XAra1VswsBut4ZShJfN3v2xZw',
+    },
+    'Engineering Girls – Telugu Version': {
+      portrait: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQss9IoCyegiAtdn5XtprNr1bSd10A-gB-FmA&s',
+      landscape: 'https://i.ytimg.com/vi/ezHRJaG0Ijk/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB1tvPNUHNyOl568zcdhvqSER9hPg',
+    },
+    'College Diaries (Telugu)': {
+      portrait: 'https://m.media-amazon.com/images/S/pv-target-images/20b583e2b1ee3767c4b2291e9b374cb9a3b6845a0b22c583d9980a590c791c22.jpg',
+      landscape: 'https://img.airtel.tv/unsafe/fit-in/1600x0/filters:format(webp)/https://xstreamcp-assets-msp.streamready.in/assets/MINITV/SERIES/6723f4cce61f4322c26cec81/images/LANDSCAPE_169/CAMPUS_DIARIES_S1_1920x1080_16x9.jpg?o=production',
+    },
+  };
+
 
     // Create Season
     const season = await prisma.term.create({

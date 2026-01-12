@@ -1,0 +1,66 @@
+services:
+  # --------------------------------------------------------------------------------
+  # API SERVICE
+  # --------------------------------------------------------------------------------
+  - type: web
+    name: ott-api
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run api:build
+    startCommand: npm run db:migrate && npm run db:seed && cd packages/api && npm run start:prod
+    envVars:
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ott-db
+          property: connectionString
+      - key: PORT
+        value: 3000
+      - key: CMS_URL
+        fromService:
+          type: web
+          name: ott-cms
+          property: url
+
+  # --------------------------------------------------------------------------------
+  # CMS SERVICE
+  # --------------------------------------------------------------------------------
+  - type: web
+    name: ott-cms
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run cms:build
+    startCommand: cd packages/cms && npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: ott-api
+          property: url
+      - key: PORT
+        value: 3001
+
+  # --------------------------------------------------------------------------------
+  # WORKER SERVICE
+  # --------------------------------------------------------------------------------
+  - type: worker
+    name: ott-worker
+    runtime: node
+    plan: free
+    buildCommand: npm install && cd packages/worker && npm run build
+    startCommand: cd packages/worker && npm run start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ott-db
+          property: connectionString
+
+databases:
+  - name: ott-db
+    databaseName: ott_cms
+    user: ott_user
+    plan: free
+    ipAllowList: [] # allow all internal connections
+
+version: "1"
