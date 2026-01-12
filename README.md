@@ -1,275 +1,219 @@
-# OTT Content Management System
+# 🎥 Enterprise OTT Platform
 
-A production-grade Over-the-Top (OTT) Content Management System built with modern technologies, similar to internal CMS tools used by streaming platforms like Netflix and Hotstar.
+![Version](https://img.shields.io/badge/version-1.0.0-blue.svg) ![License](https://img.shields.io/badge/license-MIT-green.svg) ![Status](https://img.shields.io/badge/status-maintenance-yellow.svg)
 
-## 🏗️ Architecture
+A scalable, full-stack **Over-The-Top (OTT) Media Platform** designed for high-performance content delivery. This monorepo architecture integrates a headless CMS for content management, a robust REST API for data serving, and an automated background worker for scheduled publishing.
 
+## ✨ Key Features
+
+-   **Headless CMS**: Next.js-based dashboard for intuitive content management.
+-   **Role-Based Access Control (RBAC)**: secure Admin and Editor roles with granular permissions.
+-   **Automated Publishing**: Background workers handle scheduled content release without manual intervention.
+-   **Multi-Language Support**: Native support for primary and auxiliary content languages.
+-   **Asset Management**: Structured handling of thumbnails, posters, and video URLs across variants (Landscape/Portrait).
+-   **Scalable Architecture**: Dockerized microservices ready for cloud deployment.
+
+---
+
+## 🛠 Technology Stack
+
+| Component | technologies | Description |
+| :--- | :--- | :--- |
+| **Frontend (CMS)** | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white) ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat&logo=tailwind-css&logoColor=white) | React-based dashboard with server-side rendering. |
+| **Backend API** | ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=flat&logo=nestjs&logoColor=white) ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white) | Modular architecture using NestJS for business logic. |
+| **Database** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white) ![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white) | Relational data model with type-safe ORM access. |
+| **DevOps** | ![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white) ![Render](https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=white) | Containerized environment for consistent deployment. |
+
+---
+
+## 🏗 Architecture Overview
+
+The system follows a microservices-inspired monolithic structure (Monorepo) managed by NPM workspaces.
+
+### 1. System Diagram
+
+```mermaid
+graph TD
+    UserClient[📱 End User Apps] -->|REST API| API
+    Admin[👨‍💻 Content Editor] -->|HTTPS| CMS
+    
+    subgraph "OTT Platform Infrastructure"
+        direction TB
+        CMS[🖥️ CMS Dashboard] -->|Manage Content| API[⚙️ Backend API Service]
+        API -->|Read/Write| DB[(🐘 Postgres Database)]
+        Worker[🤖 Background Worker] -->|Poll Schedule| DB
+    end
+
+    style CMS fill:#eff,stroke:#333,stroke-width:2px
+    style API fill:#ffe,stroke:#333,stroke-width:2px
+    style Worker fill:#fef,stroke:#333,stroke-width:2px
+    style DB fill:#eee,stroke:#333,stroke-width:2px
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   CMS Frontend  │    │   Backend API   │    │ Background      │
-│   (Next.js)     │◄──►│   (NestJS)      │◄──►│ Worker          │
-│   Port: 3001    │    │   Port: 3000    │    │ (Node.js)       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                                │                       │
-                                ▼                       ▼
-                       ┌─────────────────┐    ┌─────────────────┐
-                       │   PostgreSQL    │    │   Publishing    │
-                       │   Database      │    │   Queue         │
-                       │   Port: 5432    │    │   (Memory)      │
-                       └─────────────────┘    └─────────────────┘
+
+### 2. Publishing Workflow (Sequence Diagram)
+
+This diagram illustrates how content moves from Draft to Published state automatically.
+
+```mermaid
+sequenceDiagram
+    participant Editor as 👤 Editor
+    participant CMS as 🖥️ CMS
+    participant API as ⚙️ API
+    participant DB as 🐘 Database
+    participant Worker as 🤖 Worker
+
+    Note over Editor, DB: Content Creation Phase
+    Editor->>CMS: Create Lesson (Draft)
+    CMS->>API: POST /lessons
+    API->>DB: Save (Status: DRAFT)
+    
+    Editor->>CMS: Schedule Publish (e.g. 10:00 AM)
+    CMS->>API: PATCH /lessons/{id}
+    API->>DB: Update (Status: SCHEDULED, PublishAt: 10:00)
+    
+    Note over DB, Worker: Background Processing Phase
+    loop Every 60 Seconds
+        Worker->>DB: Find items where (Status=SCHEDULED & Now >= PublishAt)
+        DB-->>Worker: Return [Lesson 123]
+        Worker->>Worker: Validate Assets & Media
+        Worker->>DB: Update (Status: PUBLISHED)
+    end
+    
+    Note right of Worker: Content is now live!
 ```
 
-## 🚀 Tech Stack
+### 3. Project Structure
 
-- **Backend**: Node.js + TypeScript + NestJS
-- **Database**: PostgreSQL with Prisma ORM
-- **Frontend**: Next.js 14 + React + TypeScript
-- **Authentication**: JWT-based RBAC
-- **Worker**: Node-cron for scheduled publishing
-- **Containerization**: Docker + Docker Compose
-- **Styling**: TailwindCSS
+```bash
+OTT_app-main/
+├── packages/
+│   ├── api/          # NestJS Backend Application
+│   │   ├── src/      # Controllers, Services, Modules
+│   │   └── prisma/   # Database Schema & Seeds
+│   ├── cms/          # Next.js Frontend Application
+│   │   ├── app/      # Pages & Routing
+│   │   └── lib/      # API Clients & Utilities
+│   └── worker/       # Node.js Background Service
+│       └── src/      # Cron Jobs & Business Logic
+├── docker-compose.yml # Local development orchestration
+└── README.md         # Project documentation
+```
 
-## 📦 Domain Model
+---
 
-### Core Entities
+## 🚀 Local Setup Guide
 
-- **Program**: Main content container (like a course or series)
-- **Term**: Seasons or modules within a program
-- **Lesson**: Individual content pieces (video/article)
-- **Topic**: Content categorization
-- **Assets**: Media files (posters, thumbnails, subtitles)
-- **Users**: Admin, Editor, Viewer roles
-
-### Key Features
-
-- Multi-language content support
-- Scheduled publishing with background workers
-- Asset management with validation
-- Role-based access control
-- Public catalog API with caching
-- Responsive CMS interface
-
-## 🛠️ Local Development
+Follow these steps to get the entire platform running on your local machine.
 
 ### Prerequisites
+-   **Node.js**: v18 or higher
+-   **Docker**: Desktop version installed and running
 
-- Node.js 18+
-- Docker & Docker Compose
-- Git
-
-### Quick Start
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd ott-cms-system
-   ```
-
-2. **Environment Setup**
-   ```bash
-   # Copy environment files
-   cp packages/api/.env.example packages/api/.env
-   cp packages/cms/.env.example packages/cms/.env
-   ```
-
-3. **Start with Docker**
-   ```bash
-   npm run docker:up
-   ```
-
-   This will start all services:
-   - CMS Frontend: http://localhost:3001
-   - API Backend: http://localhost:3000
-   - API Docs: http://localhost:3000/api/docs
-   - PostgreSQL: localhost:5432
-
-4. **Initialize Database**
-   ```bash
-   # Run migrations
-   npm run db:migrate
-   
-   # Seed sample data
-   npm run db:seed
-   ```
-
-### Manual Development Setup
-
-1. **Install Dependencies**
-   ```bash
-   npm install
-   cd packages/api && npm install && cd -
-   cd packages/cms && npm install && cd -
-   cd packages/worker && npm install && cd -
-   ```
-
-2. **Start Services Individually**
-   ```bash
-   # Terminal 1: Database
-   docker run -d --name postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15
-
-   # Terminal 2: API
-   cd packages/api
-   npm run db:migrate
-   npm run db:seed
-   npm run start:dev
-
-   # Terminal 3: CMS
-   cd packages/cms
-   npm run dev
-
-   # Terminal 4: Worker
-   cd packages/worker
-   npm run dev
-   ```
-
-## 📚 Usage
-
-### Demo Credentials
-
-- **Admin**: admin@example.com / admin123
-- **Editor**: editor@example.com / editor123
-
-### Key Workflows
-
-1. **Content Creation**
-   - Create Program → Add Terms → Create Lessons
-   - Upload required assets (posters, thumbnails)
-   - Set multi-language content and subtitles
-
-2. **Publishing**
-   - Publish immediately or schedule for later
-   - Background worker processes scheduled content
-   - Automatic program publishing when lessons go live
-
-3. **Content Management**
-   - Role-based permissions (Admin, Editor, Viewer)
-   - Asset validation before publishing
-   - Multi-language support with primary language validation
-
-## 🔧 API Endpoints
-
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-
-### Content Management
-- `GET /api/programs` - List programs
-- `GET /api/lessons` - List lessons
-- `POST /api/lessons/:id/publish` - Publish lesson immediately
-- `POST /api/lessons/:id/schedule` - Schedule lesson publishing
-
-### Public Catalog (No Auth Required)
-- `GET /api/catalog/programs` - Published programs with pagination
-- `GET /api/catalog/programs/:id` - Program details
-- `GET /api/catalog/lessons/:id` - Lesson details
-
-### Asset Management
-- `POST /api/assets/programs` - Upload program assets
-- `POST /api/assets/lessons` - Upload lesson assets
-
-## 🔄 Background Worker
-
-The publishing worker runs every minute and:
-
-1. Finds lessons scheduled for publishing (`status = SCHEDULED`, `publish_at <= now()`)
-2. Validates publishing requirements (assets, content URLs)
-3. Updates lesson status to `PUBLISHED` in transaction-safe manner
-4. Auto-publishes parent program if conditions are met
-5. Handles concurrent execution safely
-
-### Publishing Requirements
-
-**Lesson Publishing**:
-- Must have portrait + landscape thumbnails for primary content language
-- Must have content URL for primary language
-
-**Program Publishing**:
-- Must have portrait + landscape posters for primary language
-- Must have at least one published lesson
-
-## 🐳 Docker Commands
-
-```bash
-# Start all services
-npm run docker:up
-
-# Stop all services
-npm run docker:down
-
-# View logs
-docker-compose logs -f api
-docker-compose logs -f cms
-docker-compose logs -f worker
-
-# Database access
-docker-compose exec postgres psql -U postgres -d ott_cms
+### Step 1: Start the Database
+Spin up the PostgreSQL instance using Docker.
+```powershell
+docker run -d --name ott-postgres -e POSTGRES_DB=ott_cms -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 postgres:15-alpine
 ```
 
-## 📊 Database Schema
-
-Key tables with proper constraints and indexes:
-
-- `programs` - Main content programs
-- `terms` - Program sections/seasons
-- `lessons` - Individual content pieces
-- `program_assets` / `lesson_assets` - Media assets
-- `program_topics` - Many-to-many program-topic relationships
-- `users` - Authentication and RBAC
-
-## 🔒 Security Features
-
-- JWT-based authentication
-- Role-based access control (RBAC)
-- Input validation with class-validator
-- SQL injection protection via Prisma
-- CORS configuration
-- Rate limiting with @nestjs/throttler
-
-## 🚀 Production Deployment
-
-### Environment Variables
-
-**API (`packages/api/.env`)**:
-```env
-DATABASE_URL="postgresql://user:pass@host:5432/dbname"
-JWT_SECRET="your-production-secret"
-PORT=3000
-CMS_URL="https://your-cms-domain.com"
+### Step 2: Install Dependencies
+Install packages for all workspaces from the root.
+```powershell
+npm install
 ```
 
-**CMS (`packages/cms/.env`)**:
-```env
-NEXT_PUBLIC_API_URL=https://your-api-domain.com/api
+### Step 3: Initialize Database
+Generate the Prisma client and push the schema to your local DB.
+```powershell
+cd packages/api
+npx prisma generate
+npx prisma db push
 ```
 
-### Build Commands
-
-```bash
-# Build all packages
-npm run build
-
-# Build individually
-npm run api:build
-npm run cms:build
+### Step 4: Seed Initial Data
+Populate the database with default users (Admin/Editor) and sample content categories.
+```powershell
+npx tsx prisma/seed.ts
 ```
 
-## 📝 Development Notes
+### Step 5: Start the Services
+You will need to run **three separate terminal windows** to keep all services active.
 
-- Database migrations are auto-generated and versioned
-- All APIs include Swagger documentation
-- TypeScript strict mode enabled
-- Comprehensive error handling and logging
-- Production-ready Docker configurations
-- Optimized for concurrent access patterns
+**Terminal 1: Backend API**
+```powershell
+cd packages/api
+npm run start:dev
+```
+*Runs on: `http://localhost:3000`*
 
-## 🤝 Contributing
+**Terminal 2: CMS Dashboard**
+```powershell
+cd packages/cms
+npm run dev
+```
+*Runs on: `http://localhost:3001`*
 
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+**Terminal 3: Background Worker**
+```powershell
+cd packages/worker
+npm run dev
+```
+*Logs scheduled tasks every minute.*
 
-## 📄 License
+---
 
-This project is licensed under the MIT License.
+## 🔐 Credentials & Access
+
+Use these default credentials to log in to the local CMS.
+
+| Role | Email | Password | Permissions |
+| :--- | :--- | :--- | :--- |
+| **Admin** | `admin@chaishorts.com` | `admin123` | Full Access (Users, Settings, Content) |
+| **Editor** | `editor@chaishorts.com` | `editor123` | Content Management Only |
+
+---
+
+## 🌐 Deployed Environments
+
+| Service | URL |
+| :--- | :--- |
+| **CMS Dashboard** | [https://ott-application-cms.vercel.app/](https://ott-application-cms.vercel.app/) |
+| **API Endpoint** | [https://ott-application.onrender.com/api](https://ott-application.onrender.com/api) |
+| **API Docs** | [https://ott-application.onrender.com/api/docs](https://ott-application.onrender.com/api/docs) |
+
+---
+
+## 🎬 Demo Scenario: Scheduled Publishing
+
+To verify the robust background worker architecture, follow this test flow:
+
+1.  **Login to the CMS** (`http://localhost:3001`) as **Admin**.
+2.  **Navigate to Programs** and create a new dummy Program (e.g., "Tech Talk 2024").
+3.  **Add a Term** (Season 1) and a **Lesson** (Episode 1).
+4.  **Set Publish Date**: In the lesson details, set the 'Publish At' time to **2 minutes in the future**.
+5.  **Save**: Observe the status is `SCHEDULED` (Yellow).
+6.  **Switch to Terminal 3 (Worker)**: Watch the logs.
+    -   *Minute 0*: "Monitoring for scheduled lessons..."
+    -   *Minute 2*: "Published lesson: [UUID]"
+7.  **Refresh CMS**: The lesson status will automatically change to `PUBLISHED` (Green).
+
+---
+
+## 📦 Database Management
+
+Common commands for managing the database during development.
+
+**Run Migrations** (after changing `schema.prisma`)
+```powershell
+npx prisma db push
+```
+
+**Reset Data** (Clear DB and re-seed)
+```powershell
+npx tsx prisma/seed.ts
+```
+
+**Open Database GUI**
+```powershell
+npx prisma studio
+```
+*Opens at `http://localhost:5555`*
