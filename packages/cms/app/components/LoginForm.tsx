@@ -49,7 +49,7 @@ export function LoginForm() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="input-field pl-10"
-              placeholder="admin@example.com"
+              placeholder="admin@chaishorts.com"
               required
             />
           </div>
@@ -98,11 +98,11 @@ export function LoginForm() {
         <div className="text-center">
           <div className="text-sm text-gray-400 bg-slate-800 p-3 rounded-lg border border-slate-700">
             <p className="font-medium mb-1 text-gray-300">Demo Credentials:</p>
-            <p>Admin: admin@example.com / admin123</p>
-            <p>Editor: editor@example.com / editor123</p>
+            <p>Admin: admin@chaishorts.com / admin123</p>
+            <p>Editor: editor@chaishorts.com / editor123</p>
           </div>
         </div>
       </form>
     </div>
   );
-}
+} 

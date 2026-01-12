@@ -45,10 +45,21 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // ✅ Allow all origins (demo / deployment)
+  // ✅ GLOBAL CORS (ALLOW ALL)
   app.enableCors({
     origin: true,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+  });
+
+  // ✅ FORCE OPTIONS SUCCESS
+  app.use((req, res, next) => {
+    if (req.method === 'OPTIONS') {
+      res.sendStatus(204);
+    } else {
+      next();
+    }
   });
 
   app.useGlobalPipes(
@@ -61,16 +72,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  const config = new DocumentBuilder()
-    .setTitle('OTT CMS API')
-    .setDescription('Production-grade OTT Content Management System API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-
   const port = process.env.PORT || 3000;
   await app.listen(port);
 }
+
