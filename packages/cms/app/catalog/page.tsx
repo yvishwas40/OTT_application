@@ -73,7 +73,7 @@ export default function CatalogPage() {
 
                     {loading ? (
                         <div className="text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto"></div>
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
                             <p className="text-gray-400 mt-4">Loading catalog...</p>
                         </div>
                     ) : filteredPrograms.length === 0 ? (
@@ -89,7 +89,7 @@ export default function CatalogPage() {
                     ) : (
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {filteredPrograms.map((program: any) => (
-                                <div key={program.id} className="card overflow-hidden hover:border-primary-500/50 transition-colors duration-200">
+                                <div key={program.id} className="card overflow-hidden hover:border-yellow-500/50 transition-colors duration-200">
                                     <div className="aspect-[2/3] relative w-full">
                                         <Image
                                             src={getPosterUrl(program)}
@@ -114,8 +114,8 @@ export default function CatalogPage() {
                                                 {program.languagePrimary}
                                             </div>
                                             <Link
-                                                href={`/programs/${program.id}`}
-                                                className="flex items-center text-sm text-primary-500 hover:text-primary-400 font-medium"
+                                                href={`/cms/programs/${program.id}`}
+                                                className="flex items-center text-sm text-yellow-500 hover:text-yellow-400 font-medium"
                                             >
                                                 View Details <ExternalLink className="ml-1 h-3 w-3" />
                                             </Link>

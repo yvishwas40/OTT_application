@@ -22,7 +22,8 @@ export function LoginForm() {
     try {
       const success = await login(email, password);
       if (success) {
-        router.push('/dashboard');
+        // Redirect will be handled by login page based on user role
+        router.push('/login');
       } else {
         setError('Invalid email or password');
       }

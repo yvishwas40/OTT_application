@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 type UserRole = 'ADMIN' | 'EDITOR' | 'VIEWER';
@@ -8,17 +12,20 @@ type ContentStatus = 'DRAFT' | 'SCHEDULED' | 'PUBLISHED' | 'ARCHIVED';
 export class ProgramsService {
   constructor(private prisma: PrismaService) {}
 
+  /* ============================================================
+     FIND ALL PROGRAMS (CMS LIST)
+  ============================================================ */
   async findAll(filters?: {
     status?: ContentStatus;
     language?: string;
     topicId?: string;
   }) {
     const where: any = {};
-    
+
     if (filters?.status) {
       where.status = filters.status;
     }
-    
+
     if (filters?.language) {
       where.languagesAvailable = {
         has: filters.language,
@@ -37,9 +44,7 @@ export class ProgramsService {
       where,
       include: {
         topics: {
-          include: {
-            topic: true,
-          },
+          include: { topic: true },
         },
         assets: true,
         terms: {
@@ -57,17 +62,19 @@ export class ProgramsService {
     });
   }
 
+  /* ============================================================
+     FIND ONE PROGRAM (DETAIL PAGE)
+  ============================================================ */
   async findOne(id: string) {
     const program = await this.prisma.program.findUnique({
       where: { id },
       include: {
         topics: {
-          include: {
-            topic: true,
-          },
+          include: { topic: true },
         },
         assets: true,
         terms: {
+          orderBy: { termNumber: 'asc' },
           include: {
             lessons: {
               include: {
@@ -75,7 +82,6 @@ export class ProgramsService {
               },
             },
           },
-          orderBy: { termNumber: 'asc' },
         },
       },
     });
@@ -87,73 +93,107 @@ export class ProgramsService {
     return program;
   }
 
+  /* ============================================================
+     CREATE PROGRAM
+  ============================================================ */
   async create(data: any, userRole: UserRole) {
     if (userRole === 'VIEWER') {
       throw new BadRequestException('Insufficient permissions');
     }
 
-    // Validate that primary language is in available languages
     if (!data.languagesAvailable?.includes(data.languagePrimary)) {
-      throw new BadRequestException('Primary language must be included in available languages');
+      throw new BadRequestException(
+        'Primary language must be included in available languages',
+      );
     }
+
+    const { topicIds, ...programData } = data;
 
     return this.prisma.program.create({
       data: {
-        ...data,
+        ...programData,
         status: 'DRAFT',
+
+        topics: Array.isArray(topicIds)
+          ? {
+              create: topicIds.map((topicId: string) => ({
+                topic: {
+                  connect: { id: topicId },
+                },
+              })),
+            }
+          : undefined,
       },
       include: {
-        topics: {
-          include: {
-            topic: true,
-          },
-        },
+        topics: { include: { topic: true } },
         assets: true,
       },
     });
   }
 
+  /* ============================================================
+     UPDATE PROGRAM  ⭐ FIXED HERE ⭐
+  ============================================================ */
   async update(id: string, data: any, userRole: UserRole) {
     if (userRole === 'VIEWER') {
       throw new BadRequestException('Insufficient permissions');
     }
 
-    const program = await this.findOne(id);
+    await this.findOne(id);
 
-    // Validate language constraints
     if (data.languagesAvailable && data.languagePrimary) {
       if (!data.languagesAvailable.includes(data.languagePrimary)) {
-        throw new BadRequestException('Primary language must be included in available languages');
+        throw new BadRequestException(
+          'Primary language must be included in available languages',
+        );
       }
     }
 
+    const { topicIds, ...programData } = data;
+
     return this.prisma.program.update({
       where: { id },
-      data,
+      data: {
+        ...programData,
+        topics: topicIds
+          ? {
+              deleteMany: {}, // remove old relations
+              create: topicIds.map((topicId: string) => ({
+                topic: { connect: { id: topicId } },
+              })),
+            }
+          : undefined,
+      },
       include: {
         topics: {
-          include: {
-            topic: true,
-          },
+          include: { topic: true },
         },
         assets: true,
       },
     });
   }
 
+  /* ============================================================
+     DELETE PROGRAM (ADMIN ONLY)
+  ============================================================ */
   async delete(id: string, userRole: UserRole) {
     if (userRole !== 'ADMIN') {
       throw new BadRequestException('Insufficient permissions');
     }
 
-    const program = await this.findOne(id);
-    return this.prisma.program.delete({ where: { id } });
+    await this.findOne(id);
+
+    return this.prisma.program.delete({
+      where: { id },
+    });
   }
 
+  /* ============================================================
+     VALIDATE PUBLISHING (ASSETS CHECK)
+  ============================================================ */
   async validatePublishing(programId: string): Promise<boolean> {
     const program = await this.findOne(programId);
-    
-    // Check if program has required assets for primary language
+
     const requiredAssets = await this.prisma.programAsset.findMany({
       where: {
         programId,
@@ -163,18 +203,18 @@ export class ProgramsService {
       },
     });
 
-    return requiredAssets.length >= 2; // Both portrait and landscape
+    return requiredAssets.length >= 2;
   }
 
+  /* ============================================================
+     AUTO-PUBLISH PROGRAM (FROM WORKER)
+  ============================================================ */
   async autoPublish(programId: string) {
     const program = await this.findOne(programId);
-    
-    // Check if program has any published lessons
+
     const publishedLessons = await this.prisma.lesson.count({
       where: {
-        term: {
-          programId,
-        },
+        term: { programId },
         status: 'PUBLISHED',
       },
     });
@@ -184,7 +224,7 @@ export class ProgramsService {
         where: { id: programId },
         data: {
           status: 'PUBLISHED',
-          publishedAt: program.publishedAt || new Date(),
+          publishedAt: program.publishedAt ?? new Date(),
         },
       });
     }

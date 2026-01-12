@@ -13,13 +13,13 @@ import {
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Series', href: '/programs', icon: PlayCircle },
-  { name: 'Episodes', href: '/lessons', icon: BookOpen },
-  { name: 'Topics', href: '/topics', icon: Tags },
+  { name: 'Dashboard', href: '/cms', icon: Home },
+  { name: 'Series', href: '/cms/programs', icon: PlayCircle },
+  { name: 'Episodes', href: '/cms/lessons', icon: BookOpen },
+  { name: 'Topics', href: '/cms/topics', icon: Tags },
   { name: 'Public Catalog', href: '/catalog', icon: Globe },
-  { name: 'Analytics', href: '/analytics', icon: BarChart3 },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Analytics', href: '/cms/analytics', icon: BarChart3 },
+  { name: 'Settings', href: '/cms/settings', icon: Settings },
 ];
 
 export function Sidebar() {

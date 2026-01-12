@@ -195,14 +195,14 @@ export default function DashboardPage() {
             <h3 className="text-lg font-medium text-white mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <a
-                href="/programs/new"
+                href="/cms/programs/new"
                 className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
                 <PlayCircle className="h-6 w-6 text-yellow-500 group-hover:text-yellow-400" />
                 <span className="font-medium text-gray-200 group-hover:text-white">Create Series</span>
               </a>
               <a
-                href="/lessons/new"
+                href="/cms/lessons/new"
                 className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
                 <BookOpen className="h-6 w-6 text-success-500 group-hover:text-success-400" />

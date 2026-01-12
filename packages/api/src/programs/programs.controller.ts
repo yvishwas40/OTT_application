@@ -31,7 +31,7 @@ export class ProgramsController {
 
   @ApiOperation({ summary: 'Get program by ID' })
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string) {
     return this.programsService.findOne(id);
   }
 
