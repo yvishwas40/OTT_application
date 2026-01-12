@@ -72,16 +72,16 @@ export class PublishingWorker {
             }
           );
 
-          console.log(`✅ Published lesson: ${lesson.title} (${lesson.id})`);
+          console.log(`✅ Episode published: ${lesson.title} (${lesson.id})`);
         } catch (error) {
           if (error instanceof Error) {
             console.error(
-              `❌ Failed to publish lesson ${lesson.id}:`,
+              `❌ Failed to publish episode ${lesson.id}:`,
               error.message
             );
           } else {
             console.error(
-              `❌ Failed to publish lesson ${lesson.id}:`,
+              `❌ Failed to publish episode ${lesson.id}:`,
               error
             );
           }
@@ -91,9 +91,9 @@ export class PublishingWorker {
       return publishedLessons;
     } catch (error) {
       if (error instanceof Error) {
-        console.error('❌ Error processing scheduled lessons:', error.message);
+        console.error('❌ Error processing scheduled episodes:', error.message);
       } else {
-        console.error('❌ Error processing scheduled lessons:', error);
+        console.error('❌ Error processing scheduled episodes:', error);
       }
       throw error;
     }
@@ -126,7 +126,7 @@ export class PublishingWorker {
 
     if (requiredAssets.length < 2) {
       throw new Error(
-        `Lesson ${lesson.title} missing required thumbnails for publishing`
+        `Episode ${lesson.title} missing required thumbnails for publishing`
       );
     }
 
@@ -137,7 +137,7 @@ export class PublishingWorker {
 
     if (!primaryUrl) {
       throw new Error(
-        `Lesson ${lesson.title} missing content URL for primary language`
+        `Episode ${lesson.title} missing content URL for primary language`
       );
     }
   }
@@ -178,7 +178,7 @@ export class PublishingWorker {
 
     if (requiredAssets.length < 2) {
       console.warn(
-        `⚠️ Program ${program.title} missing required poster assets`
+        `⚠️ Series ${program.title} missing required poster assets`
       );
       return;
     }
@@ -191,6 +191,6 @@ export class PublishingWorker {
       },
     });
 
-    console.log(`✅ Auto-published program: ${program.title} (${programId})`);
+    console.log(`✅ Series auto-published: ${program.title} (${programId})`);
   }
 }

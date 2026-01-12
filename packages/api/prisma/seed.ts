@@ -3,329 +3,264 @@ import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function main() {
-  console.log('🌱 Starting database seed...');
+/**
+ * Chai Shorts Seed
+ * Programs  -> Short Series
+ * Terms     -> Seasons
+ * Lessons   -> Episodes (2 minutes)
+ */
 
-  // Create users
+async function main() {
+  console.log('🌱 Seeding Chai Shorts database...');
+
+  /* ----------------------------------------------------
+   * USERS (CMS)
+   * -------------------------------------------------- */
   const adminPassword = await bcrypt.hash('admin123', 10);
   const editorPassword = await bcrypt.hash('editor123', 10);
-  
-  const admin = await prisma.user.upsert({
-    where: { email: 'admin@example.com' },
+
+  await prisma.user.upsert({
+    where: { email: 'admin@chaishorts.com' },
     update: {},
     create: {
-      email: 'admin@example.com',
+      email: 'admin@chaishorts.com',
       password: adminPassword,
       role: 'ADMIN',
     },
   });
 
-  const editor = await prisma.user.upsert({
-    where: { email: 'editor@example.com' },
+  await prisma.user.upsert({
+    where: { email: 'editor@chaishorts.com' },
     update: {},
     create: {
-      email: 'editor@example.com',
+      email: 'editor@chaishorts.com',
       password: editorPassword,
       role: 'EDITOR',
     },
   });
 
-  // Create topics
-  const techTopic = await prisma.topic.upsert({
-    where: { name: 'Technology' },
+  /* ----------------------------------------------------
+   * TOPICS / GENRES
+   * -------------------------------------------------- */
+  const romance = await prisma.topic.upsert({
+    where: { name: 'Romance' },
     update: {},
-    create: { name: 'Technology' },
+    create: { name: 'Romance' },
   });
 
-  const businessTopic = await prisma.topic.upsert({
-    where: { name: 'Business' },
+  const comedy = await prisma.topic.upsert({
+    where: { name: 'Comedy' },
     update: {},
-    create: { name: 'Business' },
+    create: { name: 'Comedy' },
   });
 
-  const designTopic = await prisma.topic.upsert({
-    where: { name: 'Design' },
+  const thriller = await prisma.topic.upsert({
+    where: { name: 'Thriller' },
     update: {},
-    create: { name: 'Design' },
+    create: { name: 'Thriller' },
   });
 
-  // Create programs
-  const jsProgram = await prisma.program.create({
+  /* ----------------------------------------------------
+   * SERIES (PROGRAMS)
+   * -------------------------------------------------- */
+
+  const chaiLove = await prisma.program.create({
     data: {
-      title: 'Complete JavaScript Mastery',
-      description: 'Master JavaScript from basics to advanced concepts including ES6+, async programming, and modern frameworks.',
-      languagePrimary: 'en',
-      languagesAvailable: ['en', 'es', 'fr'],
+      title: 'Chai Lo Oka Love Story',
+      description:
+        'A tender Telugu short series about unexpected love brewed over evening chai.',
+      languagePrimary: 'te',
+      languagesAvailable: ['te', 'en'],
       status: 'PUBLISHED',
-      publishedAt: new Date('2024-01-01'),
+      publishedAt: new Date(),
       topics: {
-        create: [
-          { topicId: techTopic.id },
-        ],
+        create: [{ topicId: romance.id }],
       },
     },
   });
 
-  const reactProgram = await prisma.program.create({
+  const lateNight = await prisma.program.create({
     data: {
-      title: 'React Development Bootcamp',
-      description: 'Learn React from scratch and build modern web applications with hooks, context, and state management.',
-      languagePrimary: 'en',
-      languagesAvailable: ['en', 'es'],
+      title: 'Last Bus Stop',
+      description:
+        'A thriller that unfolds during late-night bus rides and quiet conversations.',
+      languagePrimary: 'te',
+      languagesAvailable: ['te'],
       status: 'DRAFT',
       topics: {
-        create: [
-          { topicId: techTopic.id },
-        ],
+        create: [{ topicId: thriller.id }],
       },
     },
   });
 
-  // Create program assets
+  /* ----------------------------------------------------
+   * SERIES POSTERS
+   * -------------------------------------------------- */
   await prisma.programAsset.createMany({
     data: [
       {
-        programId: jsProgram.id,
-        language: 'en',
+        programId: chaiLove.id,
+        language: 'te',
         variant: 'PORTRAIT',
         assetType: 'poster',
-        url: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800',
+        url: 'https://images.pexels.com/photos/3617500/pexels-photo-3617500.jpeg',
       },
       {
-        programId: jsProgram.id,
-        language: 'en',
+        programId: chaiLove.id,
+        language: 'te',
         variant: 'LANDSCAPE',
         assetType: 'poster',
-        url: 'https://images.pexels.com/photos/11035471/pexels-photo-11035471.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        url: 'https://images.pexels.com/photos/3617512/pexels-photo-3617512.jpeg',
       },
       {
-        programId: reactProgram.id,
-        language: 'en',
+        programId: lateNight.id,
+        language: 'te',
         variant: 'PORTRAIT',
         assetType: 'poster',
-        url: 'https://images.pexels.com/photos/11035540/pexels-photo-11035540.jpeg?auto=compress&cs=tinysrgb&w=800',
+        url: 'https://images.pexels.com/photos/713149/pexels-photo-713149.jpeg',
       },
       {
-        programId: reactProgram.id,
-        language: 'en',
+        programId: lateNight.id,
+        language: 'te',
         variant: 'LANDSCAPE',
         assetType: 'poster',
-        url: 'https://images.pexels.com/photos/11035365/pexels-photo-11035365.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        url: 'https://images.pexels.com/photos/713150/pexels-photo-713150.jpeg',
       },
     ],
   });
 
-  // Create terms for JavaScript program
-  const jsTerm1 = await prisma.term.create({
+  /* ----------------------------------------------------
+   * SEASONS (TERMS)
+   * -------------------------------------------------- */
+  const chaiSeason1 = await prisma.term.create({
     data: {
-      programId: jsProgram.id,
+      programId: chaiLove.id,
       termNumber: 1,
-      title: 'JavaScript Fundamentals',
+      title: 'Season 1',
     },
   });
 
-  const jsTerm2 = await prisma.term.create({
+  const nightSeason1 = await prisma.term.create({
     data: {
-      programId: jsProgram.id,
-      termNumber: 2,
-      title: 'Advanced JavaScript',
-    },
-  });
-
-  // Create terms for React program
-  const reactTerm1 = await prisma.term.create({
-    data: {
-      programId: reactProgram.id,
+      programId: lateNight.id,
       termNumber: 1,
-      title: 'React Basics',
+      title: 'Season 1',
     },
   });
 
-  // Create lessons for JavaScript program
-  const jsLesson1 = await prisma.lesson.create({
+  /* ----------------------------------------------------
+   * EPISODES (LESSONS) – 2 MINUTES EACH
+   * -------------------------------------------------- */
+
+  const ep1 = await prisma.lesson.create({
     data: {
-      termId: jsTerm1.id,
+      termId: chaiSeason1.id,
       lessonNumber: 1,
-      title: 'Variables and Data Types',
+      title: 'First Sip',
       contentType: 'VIDEO',
-      durationMs: 1800000, // 30 minutes
+      durationMs: 120000,
       isPaid: false,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en', 'es'],
+      contentLanguagePrimary: 'te',
+      contentLanguagesAvailable: ['te', 'en'],
       contentUrlsByLanguage: {
-        en: 'https://example.com/videos/js-variables-en.mp4',
-        es: 'https://example.com/videos/js-variables-es.mp4',
-      },
-      subtitleLanguages: ['en', 'es'],
-      subtitleUrlsByLanguage: {
-        en: 'https://example.com/subtitles/js-variables-en.vtt',
-        es: 'https://example.com/subtitles/js-variables-es.vtt',
+        te: 'https://example.com/chai/ep1-te.mp4',
+        en: 'https://example.com/chai/ep1-en.mp4',
       },
       status: 'PUBLISHED',
-      publishedAt: new Date('2024-01-02'),
+      publishedAt: new Date(),
     },
   });
 
-  const jsLesson2 = await prisma.lesson.create({
+  const ep2 = await prisma.lesson.create({
     data: {
-      termId: jsTerm1.id,
+      termId: chaiSeason1.id,
       lessonNumber: 2,
-      title: 'Functions and Scope',
+      title: 'Silent Glance',
       contentType: 'VIDEO',
-      durationMs: 2400000, // 40 minutes
-      isPaid: true,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en'],
+      durationMs: 115000,
+      isPaid: false,
+      contentLanguagePrimary: 'te',
+      contentLanguagesAvailable: ['te'],
       contentUrlsByLanguage: {
-        en: 'https://example.com/videos/js-functions-en.mp4',
+        te: 'https://example.com/chai/ep2-te.mp4',
       },
       status: 'PUBLISHED',
-      publishedAt: new Date('2024-01-03'),
+      publishedAt: new Date(),
     },
   });
 
-  const jsLesson3 = await prisma.lesson.create({
+  const ep3 = await prisma.lesson.create({
     data: {
-      termId: jsTerm2.id,
-      lessonNumber: 1,
-      title: 'Async Programming',
-      contentType: 'VIDEO',
-      durationMs: 3000000, // 50 minutes
-      isPaid: true,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en'],
-      contentUrlsByLanguage: {
-        en: 'https://example.com/videos/js-async-en.mp4',
-      },
-      status: 'SCHEDULED',
-      publishAt: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes from now
-    },
-  });
-
-  // Create lessons for React program
-  const reactLesson1 = await prisma.lesson.create({
-    data: {
-      termId: reactTerm1.id,
-      lessonNumber: 1,
-      title: 'Introduction to React',
-      contentType: 'ARTICLE',
-      isPaid: false,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en'],
-      contentUrlsByLanguage: {
-        en: 'https://example.com/articles/react-intro-en.html',
-      },
-      status: 'DRAFT',
-    },
-  });
-
-  const reactLesson2 = await prisma.lesson.create({
-    data: {
-      termId: reactTerm1.id,
-      lessonNumber: 2,
-      title: 'Components and Props',
-      contentType: 'VIDEO',
-      durationMs: 2700000, // 45 minutes
-      isPaid: false,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en'],
-      contentUrlsByLanguage: {
-        en: 'https://example.com/videos/react-components-en.mp4',
-      },
-      status: 'DRAFT',
-    },
-  });
-
-  const reactLesson3 = await prisma.lesson.create({
-    data: {
-      termId: reactTerm1.id,
+      termId: chaiSeason1.id,
       lessonNumber: 3,
-      title: 'State and Lifecycle',
+      title: 'Unspoken Words',
       contentType: 'VIDEO',
-      durationMs: 3600000, // 60 minutes
+      durationMs: 125000,
       isPaid: true,
-      contentLanguagePrimary: 'en',
-      contentLanguagesAvailable: ['en'],
+      contentLanguagePrimary: 'te',
+      contentLanguagesAvailable: ['te'],
       contentUrlsByLanguage: {
-        en: 'https://example.com/videos/react-state-en.mp4',
+        te: 'https://example.com/chai/ep3-te.mp4',
       },
       status: 'SCHEDULED',
-      publishAt: new Date(Date.now() + 1 * 60 * 1000), // 1 minute from now
+      publishAt: new Date(Date.now() + 2 * 60 * 1000),
     },
   });
 
-  // Create lesson assets
+  /* ----------------------------------------------------
+   * THUMBNAILS
+   * -------------------------------------------------- */
   await prisma.lessonAsset.createMany({
     data: [
-      // JS Lesson 1 assets
       {
-        lessonId: jsLesson1.id,
-        language: 'en',
+        lessonId: ep1.id,
+        language: 'te',
         variant: 'PORTRAIT',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=800',
+        url: 'https://images.pexels.com/photos/1525041/pexels-photo-1525041.jpeg',
       },
       {
-        lessonId: jsLesson1.id,
-        language: 'en',
+        lessonId: ep1.id,
+        language: 'te',
         variant: 'LANDSCAPE',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        url: 'https://images.pexels.com/photos/1525042/pexels-photo-1525042.jpeg',
       },
-      // JS Lesson 2 assets
       {
-        lessonId: jsLesson2.id,
-        language: 'en',
+        lessonId: ep2.id,
+        language: 'te',
         variant: 'PORTRAIT',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/276452/pexels-photo-276452.jpeg?auto=compress&cs=tinysrgb&w=800',
+        url: 'https://images.pexels.com/photos/3772622/pexels-photo-3772622.jpeg',
       },
       {
-        lessonId: jsLesson2.id,
-        language: 'en',
+        lessonId: ep2.id,
+        language: 'te',
         variant: 'LANDSCAPE',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/276452/pexels-photo-276452.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        url: 'https://images.pexels.com/photos/3772623/pexels-photo-3772623.jpeg',
       },
-      // JS Lesson 3 assets
       {
-        lessonId: jsLesson3.id,
-        language: 'en',
+        lessonId: ep3.id,
+        language: 'te',
         variant: 'PORTRAIT',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg?auto=compress&cs=tinysrgb&w=800',
+        url: 'https://images.pexels.com/photos/713148/pexels-photo-713148.jpeg',
       },
       {
-        lessonId: jsLesson3.id,
-        language: 'en',
+        lessonId: ep3.id,
+        language: 'te',
         variant: 'LANDSCAPE',
         assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/574071/pexels-photo-574071.jpeg?auto=compress&cs=tinysrgb&w=1200',
-      },
-      // React Lesson 3 assets (for scheduled lesson)
-      {
-        lessonId: reactLesson3.id,
-        language: 'en',
-        variant: 'PORTRAIT',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=800',
-      },
-      {
-        lessonId: reactLesson3.id,
-        language: 'en',
-        variant: 'LANDSCAPE',
-        assetType: 'thumbnail',
-        url: 'https://images.pexels.com/photos/11035380/pexels-photo-11035380.jpeg?auto=compress&cs=tinysrgb&w=1200',
+        url: 'https://images.pexels.com/photos/713147/pexels-photo-713147.jpeg',
       },
     ],
   });
 
-  console.log('✅ Database seeded successfully!');
-  console.log('👤 Admin user: admin@example.com / admin123');
-  console.log('👤 Editor user: editor@example.com / editor123');
-  console.log(`📚 Created ${await prisma.program.count()} programs`);
-  console.log(`📖 Created ${await prisma.lesson.count()} lessons`);
-  console.log(`⏱️  Scheduled lessons will publish in 1-2 minutes`);
+  console.log('✅ Chai Shorts database seeded successfully!');
+  console.log('👤 Admin: admin@chaishorts.com / admin123');
+  console.log('👤 Editor: editor@chaishorts.com / editor123');
+  console.log('⏱️ One episode will auto-publish in ~2 minutes');
 }
 
 main()

@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { Layout } from '../components/Layout';
 import { AuthProvider } from '../lib/auth';
 import { api } from '../lib/api';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Filter,
   Eye,
   Edit,
@@ -54,18 +54,18 @@ export default function ProgramsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED': return 'bg-success-100 text-success-700';
-      case 'SCHEDULED': return 'bg-warning-100 text-warning-700';
-      case 'DRAFT': return 'bg-gray-100 text-gray-700';
-      case 'ARCHIVED': return 'bg-error-100 text-error-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'PUBLISHED': return 'bg-success-900/30 text-success-400 border border-success-900/50';
+      case 'SCHEDULED': return 'bg-warning-900/30 text-warning-400 border border-warning-900/50';
+      case 'DRAFT': return 'bg-slate-800 text-gray-400 border border-slate-700';
+      case 'ARCHIVED': return 'bg-red-900/30 text-red-400 border border-red-900/50';
+      default: return 'bg-slate-800 text-gray-400 border border-slate-700';
     }
   };
 
   const getPosterUrl = (program: any) => {
-    const asset = program.assets?.find((a: any) => 
-      a.assetType === 'poster' && 
-      a.variant === 'PORTRAIT' && 
+    const asset = program.assets?.find((a: any) =>
+      a.assetType === 'poster' &&
+      a.variant === 'PORTRAIT' &&
       a.language === program.languagePrimary
     );
     return asset?.url || 'https://images.pexels.com/photos/270348/pexels-photo-270348.jpeg?auto=compress&cs=tinysrgb&w=400';
@@ -78,13 +78,13 @@ export default function ProgramsPage() {
           {/* Header */}
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Programs</h1>
-              <p className="text-gray-600">Manage your educational programs</p>
+              <h1 className="text-2xl font-bold text-white">Series</h1>
+              <p className="text-gray-400">Manage your short-form series</p>
             </div>
-            <button className="btn-primary flex items-center gap-x-2">
+            <Link href="/programs/new" className="btn-primary flex items-center gap-x-2">
               <Plus className="h-4 w-4" />
-              Create Program
-            </button>
+              Create Series
+            </Link>
           </div>
 
           {/* Filters */}
@@ -96,7 +96,7 @@ export default function ProgramsPage() {
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <input
                       type="text"
-                      placeholder="Search programs..."
+                      placeholder="Search series..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="input-field pl-10"
@@ -111,8 +111,8 @@ export default function ProgramsPage() {
                   >
                     <option value="">All Status</option>
                     <option value="DRAFT">Draft</option>
-                    <option value="SCHEDULED">Scheduled</option>
-                    <option value="PUBLISHED">Published</option>
+                    <option value="SCHEDULED">Scheduled Drop</option>
+                    <option value="PUBLISHED">Live</option>
                     <option value="ARCHIVED">Archived</option>
                   </select>
                 </div>
@@ -149,29 +149,28 @@ export default function ProgramsPage() {
           {/* Programs Grid */}
           {loading ? (
             <div className="text-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-              <p className="text-gray-600 mt-4">Loading programs...</p>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
+              <p className="text-gray-400 mt-4">Loading series...</p>
             </div>
           ) : filteredPrograms.length === 0 ? (
             <div className="card p-12 text-center">
               <div className="text-gray-400 mb-4">
                 <PlayCircle className="h-16 w-16 mx-auto" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No programs found</h3>
-              <p className="text-gray-600 mb-6">
-                {searchTerm || statusFilter ? 'Try adjusting your search or filter criteria.' : 'Create your first program to get started.'}
+              <h3 className="text-lg font-medium text-white mb-2">No series found</h3>
+              <p className="text-gray-400 mb-6">
+                Get started by creating your first series.
               </p>
-              {!searchTerm && !statusFilter && (
-                <button className="btn-primary">
-                  Create Program
-                </button>
-              )}
+              <Link href="/programs/new" className="btn-primary inline-flex items-center gap-x-2">
+                <Plus className="h-4 w-4" />
+                Create Series
+              </Link>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredPrograms.map((program: any) => (
-                <div key={program.id} className="card overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                  <div className="aspect-w-3 aspect-h-4 relative">
+                <div key={program.id} className="card overflow-hidden hover:border-yellow-500/50 transition-colors duration-200">
+                  <div className="aspect-[2/3] relative w-full bg-slate-800">
                     <Image
                       src={getPosterUrl(program)}
                       alt={program.title}
@@ -179,49 +178,45 @@ export default function ProgramsPage() {
                       className="object-cover"
                     />
                     <div className="absolute top-2 right-2">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(program.status)}`}>
-                        {program.status}
+                      <span className={`px-2 py-1 rounded text-xs font-bold backdrop-blur-sm ${getStatusColor(program.status)}`}>
+                        {program.status === 'PUBLISHED' ? 'Live' : program.status === 'SCHEDULED' ? 'Scheduled Drop' : program.status}
                       </span>
                     </div>
                   </div>
-                  
-                  <div className="p-4">
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2 line-clamp-2">
+
+                  <div className="p-4 bg-slate-900">
+                    <h3 className="font-bold text-white text-lg mb-2 line-clamp-2">
                       {program.title}
                     </h3>
-                    
-                    <div className="flex items-center text-sm text-gray-600 mb-3">
-                      <Globe className="h-4 w-4 mr-1" />
-                      <span>{program.languagePrimary}</span>
-                      <span className="mx-2">•</span>
-                      <span>{program.terms?.length || 0} terms</span>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex items-center text-xs text-gray-400">
+                        <Globe className="h-3 w-3 mr-1" />
+                        {program.languagePrimary}
+                      </div>
+                      <div className="flex items-center text-xs text-gray-400">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(program.updatedAt).toLocaleDateString()}
+                      </div>
                     </div>
 
-                    {program.publishedAt && (
-                      <div className="flex items-center text-sm text-gray-500 mb-4">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>Published {new Date(program.publishedAt).toLocaleDateString()}</span>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between items-center pt-3 border-t border-gray-100">
+                    <div className="flex justify-between items-center pt-3 border-t border-slate-800 mt-3">
                       <div className="flex space-x-2">
-                        <Link 
-                          href={`/programs/${program.id}`}
-                          className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                        <Link 
-                          href={`/programs/${program.id}`}
-                          className="p-1.5 text-gray-400 hover:text-primary-600 hover:bg-primary-50 rounded"
-                        >
+                        <Link href={`/programs/${program.id}`} className="p-1.5 text-gray-400 hover:text-yellow-500 hover:bg-slate-800 rounded transition-colors">
                           <Edit className="h-4 w-4" />
                         </Link>
+                        {/* 
+                        <button className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-slate-800 rounded transition-colors">
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                        */}
                       </div>
-                      <button className="p-1.5 text-gray-400 hover:text-error-600 hover:bg-error-50 rounded">
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      <Link
+                        href={`/programs/${program.id}`}
+                        className="flex items-center text-sm text-yellow-500 hover:text-yellow-400 font-medium"
+                      >
+                        Details
+                      </Link>
                     </div>
                   </div>
                 </div>

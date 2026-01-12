@@ -6,8 +6,8 @@ import { AuthProvider } from './lib/auth';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'OTT CMS - Content Management System',
-  description: 'Production-grade OTT Content Management System',
+  title: 'Chai Shorts CMS - Series & Episode Management',
+  description: 'Chai Shorts Content Management System for short-form series',
 };
 
 export default function RootLayout({

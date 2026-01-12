@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Layout } from '../../components/Layout';
 import { AuthProvider, useAuth } from '../../lib/auth';
 import { api } from '../../lib/api';
-import { 
+import {
   ArrowLeft,
   Edit,
   Save,
@@ -25,7 +25,7 @@ function ProgramDetailContent() {
   const router = useRouter();
   const { user } = useAuth();
   const programId = params.id as string;
-  
+
   const [program, setProgram] = useState<any>(null);
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +92,8 @@ function ProgramDetailContent() {
       });
       setNewPosterUrl({ language: 'en', variant: 'PORTRAIT', url: '' });
       fetchProgram();
+      const modal = document.getElementById('poster-modal') as any;
+      if (modal) modal.close();
     } catch (error: any) {
       alert(error.response?.data?.message || 'Failed to add poster');
     }
@@ -110,10 +112,10 @@ function ProgramDetailContent() {
   if (loading) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="text-gray-600 mt-4">Loading program...</p>
-        </div>
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-yellow-500 mx-auto"></div>
+            <p className="text-gray-400 mt-4">Loading series...</p>
+          </div>
       </Layout>
     );
   }
@@ -122,9 +124,9 @@ function ProgramDetailContent() {
     return (
       <Layout>
         <div className="card p-12 text-center">
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Program not found</h3>
-          <Link href="/programs" className="text-primary-600 hover:underline">
-            Back to Programs
+          <h3 className="text-lg font-medium text-white mb-2">Series not found</h3>
+          <Link href="/programs" className="text-yellow-500 hover:text-yellow-400 hover:underline">
+            Back to Series
           </Link>
         </div>
       </Layout>
@@ -133,11 +135,11 @@ function ProgramDetailContent() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PUBLISHED': return 'bg-success-100 text-success-700';
-      case 'SCHEDULED': return 'bg-warning-100 text-warning-700';
-      case 'DRAFT': return 'bg-gray-100 text-gray-700';
-      case 'ARCHIVED': return 'bg-error-100 text-error-700';
-      default: return 'bg-gray-100 text-gray-700';
+      case 'PUBLISHED': return 'bg-success-900/30 text-success-400 border border-success-900/50';
+      case 'SCHEDULED': return 'bg-warning-900/30 text-warning-400 border border-warning-900/50';
+      case 'DRAFT': return 'bg-slate-800 text-gray-400 border border-slate-700';
+      case 'ARCHIVED': return 'bg-red-900/30 text-red-400 border border-red-900/50';
+      default: return 'bg-slate-800 text-gray-400 border border-slate-700';
     }
   };
 
@@ -148,17 +150,17 @@ function ProgramDetailContent() {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center gap-4">
-          <Link href="/programs" className="p-2 hover:bg-gray-100 rounded">
+          <Link href="/programs" className="p-2 hover:bg-slate-800 rounded transition-colors text-gray-400 hover:text-white">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold text-gray-900">{program.title}</h1>
+            <h1 className="text-2xl font-bold text-white">Series Control Room: {program.title}</h1>
             <div className="flex items-center gap-4 mt-2">
               <span className={`px-3 py-1 rounded text-sm font-medium ${getStatusColor(program.status)}`}>
-                {program.status}
+                {program.status === 'PUBLISHED' ? 'Live' : program.status === 'SCHEDULED' ? 'Scheduled Drop' : program.status}
               </span>
               {program.publishedAt && (
-                <div className="flex items-center text-sm text-gray-600">
+                <div className="flex items-center text-sm text-gray-400">
                   <Calendar className="h-4 w-4 mr-1" />
                   Published {new Date(program.publishedAt).toLocaleDateString()}
                 </div>
@@ -191,57 +193,57 @@ function ProgramDetailContent() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Program Details */}
+            {/* Series Details */}
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Program Details</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">Series Details</h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Title</label>
                   {editing ? (
                     <input
                       type="text"
                       value={editData.title}
                       onChange={(e) => setEditData({ ...editData, title: e.target.value })}
-                      className="input-field w-full"
+                      className="input-field"
                     />
                   ) : (
-                    <p className="text-gray-900">{program.title}</p>
+                    <p className="text-gray-100">{program.title}</p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">Description</label>
                   {editing ? (
                     <textarea
                       value={editData.description || ''}
                       onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                      className="input-field w-full"
+                      className="input-field"
                       rows={4}
                     />
                   ) : (
-                    <p className="text-gray-600 whitespace-pre-wrap">{program.description || 'No description'}</p>
+                    <p className="text-gray-300 whitespace-pre-wrap">{program.description || 'No description'}</p>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Primary Language</label>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Primary Language</label>
                     {editing ? (
                       <select
                         value={editData.languagePrimary}
                         onChange={(e) => setEditData({ ...editData, languagePrimary: e.target.value })}
-                        className="input-field w-full"
+                        className="input-field"
                       >
                         <option value="en">English</option>
                         <option value="es">Spanish</option>
                         <option value="fr">French</option>
                       </select>
                     ) : (
-                      <p className="text-gray-900">{program.languagePrimary}</p>
+                      <p className="text-gray-100">{program.languagePrimary}</p>
                     )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Available Languages</label>
+                    <label className="block text-sm font-medium text-gray-400 mb-1">Available Languages</label>
                     {editing ? (
-                      <div className="space-y-2">
+                      <div className="space-y-2 mt-2">
                         {['en', 'es', 'fr'].map(lang => (
                           <label key={lang} className="flex items-center">
                             <input
@@ -255,14 +257,14 @@ function ProgramDetailContent() {
                                   setEditData({ ...editData, languagesAvailable: langs.filter((l: string) => l !== lang) });
                                 }
                               }}
-                              className="mr-2"
+                              className="mr-2 rounded border-gray-600 bg-slate-800 text-yellow-500 focus:ring-yellow-500"
                             />
-                            <span className="text-sm text-gray-700">{lang}</span>
+                            <span className="text-sm text-gray-300">{lang}</span>
                           </label>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-gray-900">{program.languagesAvailable?.join(', ') || 'None'}</p>
+                      <p className="text-gray-100">{program.languagesAvailable?.join(', ') || 'None'}</p>
                     )}
                   </div>
                 </div>
@@ -272,7 +274,7 @@ function ProgramDetailContent() {
             {/* Topics */}
             <div className="card p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Topics</h2>
+                <h2 className="text-lg font-semibold text-white">Topics</h2>
                 {canEdit && editing && (
                   <div className="flex items-center gap-2">
                     <select
@@ -282,7 +284,7 @@ function ProgramDetailContent() {
                           setSelectedTopics([...selectedTopics, e.target.value]);
                         }
                       }}
-                      className="input-field text-sm"
+                      className="input-field py-1 text-sm"
                     >
                       <option value="">Add Topic</option>
                       {topics.filter((t: any) => !selectedTopics.includes(t.id)).map((topic: any) => (
@@ -294,13 +296,13 @@ function ProgramDetailContent() {
               </div>
               <div className="flex flex-wrap gap-2">
                 {program.topics?.map((pt: any) => (
-                  <span key={pt.topicId} className="inline-flex items-center gap-2 px-3 py-1 bg-primary-100 text-primary-700 rounded-full text-sm">
+                  <span key={pt.topicId} className="inline-flex items-center gap-2 px-3 py-1 bg-slate-800 text-yellow-400 rounded-full text-sm border border-slate-700">
                     <Tag className="h-3 w-3" />
                     {pt.topic?.name}
                     {canEdit && editing && (
                       <button
                         onClick={() => setSelectedTopics(selectedTopics.filter(id => id !== pt.topicId))}
-                        className="hover:text-primary-900"
+                        className="hover:text-yellow-300 ml-1"
                       >
                         <X className="h-3 w-3" />
                       </button>
@@ -313,33 +315,33 @@ function ProgramDetailContent() {
               </div>
             </div>
 
-            {/* Terms & Lessons */}
+            {/* Seasons & Episodes */}
             <div className="card p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">Terms & Lessons</h2>
+              <h2 className="text-lg font-semibold text-white mb-4">Seasons & Episodes</h2>
               <div className="space-y-4">
                 {program.terms?.map((term: any) => (
-                  <div key={term.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={term.id} className="border border-slate-800 rounded-lg p-4 bg-slate-900/50">
                     <div className="flex justify-between items-center mb-3">
-                      <h3 className="font-semibold text-gray-900">
-                        Term {term.termNumber}: {term.title || 'Untitled'}
+                      <h3 className="font-semibold text-gray-200">
+                        Season {term.termNumber}: {term.title || 'Untitled'}
                       </h3>
-                      <span className="text-sm text-gray-600">{term.lessons?.length || 0} lessons</span>
+                      <span className="text-sm text-gray-500">{term.lessons?.length || 0} episodes</span>
                     </div>
                     <div className="space-y-2">
                       {term.lessons?.map((lesson: any) => (
                         <Link
                           key={lesson.id}
                           href={`/lessons/${lesson.id}`}
-                          className="flex items-center justify-between p-2 hover:bg-gray-50 rounded"
+                          className="flex items-center justify-between p-2 hover:bg-slate-800 rounded transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <BookOpen className="h-4 w-4 text-gray-400" />
-                            <span className="text-sm text-gray-900">
-                              Lesson {lesson.lessonNumber}: {lesson.title}
+                            <BookOpen className="h-4 w-4 text-gray-500" />
+                            <span className="text-sm text-gray-300">
+                              Episode {lesson.lessonNumber}: {lesson.title}
                             </span>
                           </div>
                           <span className={`px-2 py-1 rounded text-xs ${getStatusColor(lesson.status)}`}>
-                            {lesson.status}
+                            {lesson.status === 'PUBLISHED' ? 'Dropped' : lesson.status === 'SCHEDULED' ? 'Scheduled Drop' : lesson.status}
                           </span>
                         </Link>
                       ))}
@@ -347,7 +349,7 @@ function ProgramDetailContent() {
                   </div>
                 ))}
                 {(!program.terms || program.terms.length === 0) && (
-                  <p className="text-gray-500 text-center py-4">No terms yet</p>
+                  <p className="text-gray-500 text-center py-4">No seasons yet</p>
                 )}
               </div>
             </div>
@@ -355,17 +357,17 @@ function ProgramDetailContent() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Posters */}
+            {/* Series Posters */}
             <div className="card p-6">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900">Posters</h2>
+                <h2 className="text-lg font-semibold text-white">Series Posters</h2>
                 {canEdit && (
                   <button
                     onClick={() => {
                       const modal = document.getElementById('poster-modal');
                       if (modal) (modal as any).showModal();
                     }}
-                    className="p-1 text-primary-600 hover:bg-primary-50 rounded"
+                    className="p-1 text-yellow-500 hover:bg-slate-800 rounded transition-colors"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
@@ -373,16 +375,16 @@ function ProgramDetailContent() {
               </div>
               <div className="space-y-3">
                 {program.assets?.filter((a: any) => a.assetType === 'poster').map((asset: any) => (
-                  <div key={asset.id} className="border border-gray-200 rounded p-2">
-                    <div className="aspect-video bg-gray-100 rounded mb-2 relative overflow-hidden">
+                  <div key={asset.id} className="border border-slate-800 rounded p-2 bg-slate-900/50">
+                    <div className="aspect-video bg-slate-800 rounded mb-2 relative overflow-hidden">
                       <img src={asset.url} alt={`${asset.variant} ${asset.language}`} className="w-full h-full object-cover" />
                     </div>
-                    <div className="flex justify-between items-center text-xs text-gray-600">
+                    <div className="flex justify-between items-center text-xs text-gray-500">
                       <span>{asset.variant} - {asset.language}</span>
                       {canEdit && (
                         <button
                           onClick={() => handleDeletePoster(asset.id)}
-                          className="text-error-600 hover:text-error-700"
+                          className="text-red-400 hover:text-red-300 transition-colors"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -400,11 +402,11 @@ function ProgramDetailContent() {
 
         {/* Add Poster Modal */}
         <dialog id="poster-modal" className="modal">
-          <div className="modal-box">
-            <h3 className="font-bold text-lg mb-4">Add Poster</h3>
+          <div className="modal-box bg-slate-900 border border-slate-700 text-gray-100">
+            <h3 className="font-bold text-lg mb-4 text-white">Add Poster</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Language</label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Language</label>
                 <select
                   value={newPosterUrl.language}
                   onChange={(e) => setNewPosterUrl({ ...newPosterUrl, language: e.target.value })}
@@ -416,7 +418,7 @@ function ProgramDetailContent() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Variant</label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">Variant</label>
                 <select
                   value={newPosterUrl.variant}
                   onChange={(e) => setNewPosterUrl({ ...newPosterUrl, variant: e.target.value })}
@@ -429,7 +431,7 @@ function ProgramDetailContent() {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL</label>
+                <label className="block text-sm font-medium text-gray-400 mb-1">URL</label>
                 <input
                   type="text"
                   value={newPosterUrl.url}
@@ -462,4 +464,3 @@ export default function ProgramDetailPage() {
     </AuthProvider>
   );
 }
-

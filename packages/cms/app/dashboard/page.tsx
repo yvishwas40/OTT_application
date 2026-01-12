@@ -4,10 +4,10 @@ import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
 import { AuthProvider } from '../lib/auth';
 import { api } from '../lib/api';
-import { 
-  PlayCircle, 
-  BookOpen, 
-  Clock, 
+import {
+  PlayCircle,
+  BookOpen,
+  Clock,
   Users,
   TrendingUp,
   Calendar,
@@ -66,32 +66,32 @@ export default function DashboardPage() {
 
   const statCards = [
     {
-      name: 'Total Programs',
+      name: 'Total Series',
       value: stats.totalPrograms,
       icon: PlayCircle,
-      color: 'text-primary-600',
-      bg: 'bg-primary-50',
+      color: 'text-yellow-400',
+      bg: 'bg-yellow-900/20',
     },
     {
-      name: 'Total Lessons',
+      name: 'Total Episodes',
       value: stats.totalLessons,
       icon: BookOpen,
-      color: 'text-success-600',
-      bg: 'bg-success-50',
+      color: 'text-success-400',
+      bg: 'bg-success-900/20',
     },
     {
-      name: 'Scheduled',
+      name: 'Scheduled Drops',
       value: stats.scheduledLessons,
       icon: Clock,
-      color: 'text-warning-600',
-      bg: 'bg-warning-50',
+      color: 'text-warning-400',
+      bg: 'bg-warning-900/20',
     },
     {
-      name: 'Published',
+      name: 'Published Episodes',
       value: stats.publishedLessons,
       icon: TrendingUp,
-      color: 'text-success-600',
-      bg: 'bg-success-50',
+      color: 'text-success-400',
+      bg: 'bg-success-900/20',
     },
   ];
 
@@ -100,8 +100,8 @@ export default function DashboardPage() {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600">Overview of your content management system</p>
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+            <p className="text-gray-400">Chai Shorts content management dashboard</p>
           </div>
 
           {/* Stats Cards */}
@@ -113,8 +113,8 @@ export default function DashboardPage() {
                     <stat.icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">{stat.name}</p>
-                    <p className="text-2xl font-semibold text-gray-900">
+                    <p className="text-sm font-medium text-gray-400">{stat.name}</p>
+                    <p className="text-2xl font-semibold text-white">
                       {loading ? '...' : stat.value}
                     </p>
                   </div>
@@ -125,29 +125,29 @@ export default function DashboardPage() {
 
           {/* Recent Activity */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* Recent Programs */}
+            {/* Recent Series */}
             <div className="card">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Programs</h3>
+              <div className="px-6 py-4 border-b border-slate-800">
+                <h3 className="text-lg font-medium text-white">Recent Series</h3>
               </div>
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-slate-800">
                 {loading ? (
                   <div className="p-6 text-center text-gray-500">Loading...</div>
                 ) : stats.recentPrograms.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">No programs yet</div>
+                  <div className="p-6 text-center text-gray-500">No series yet</div>
                 ) : (
                   stats.recentPrograms.map((program) => (
-                    <div key={program.id} className="p-6 hover:bg-gray-50">
+                    <div key={program.id} className="p-6 hover:bg-slate-800 transition-colors">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">{program.title}</p>
-                          <p className="text-sm text-gray-600">
-                            {program.languagePrimary} • {program.terms?.length || 0} terms
+                          <p className="font-medium text-gray-100">{program.title}</p>
+                          <p className="text-sm text-gray-400">
+                            {program.languagePrimary} • {program.terms?.length || 0} seasons
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className={`status-${program.status.toLowerCase()}`}>
-                            {program.status}
+                            {program.status === 'PUBLISHED' ? 'Live' : program.status}
                           </span>
                         </div>
                       </div>
@@ -157,29 +157,29 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Recent Lessons */}
+            {/* Recent Episodes */}
             <div className="card">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900">Recent Lessons</h3>
+              <div className="px-6 py-4 border-b border-slate-800">
+                <h3 className="text-lg font-medium text-white">Recent Episodes</h3>
               </div>
-              <div className="divide-y divide-gray-200">
+              <div className="divide-y divide-slate-800">
                 {loading ? (
                   <div className="p-6 text-center text-gray-500">Loading...</div>
                 ) : stats.recentLessons.length === 0 ? (
-                  <div className="p-6 text-center text-gray-500">No lessons yet</div>
+                  <div className="p-6 text-center text-gray-500">No episodes yet</div>
                 ) : (
                   stats.recentLessons.map((lesson) => (
-                    <div key={lesson.id} className="p-6 hover:bg-gray-50">
+                    <div key={lesson.id} className="p-6 hover:bg-slate-800 transition-colors">
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">{lesson.title}</p>
-                          <p className="text-sm text-gray-600">
+                          <p className="font-medium text-gray-100">{lesson.title}</p>
+                          <p className="text-sm text-gray-400">
                             {lesson.term?.program?.title} • {lesson.contentType}
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
                           <span className={`status-${lesson.status.toLowerCase()}`}>
-                            {lesson.status}
+                            {lesson.status === 'PUBLISHED' ? 'Dropped' : lesson.status === 'SCHEDULED' ? 'Scheduled Drop' : lesson.status}
                           </span>
                         </div>
                       </div>
@@ -192,35 +192,35 @@ export default function DashboardPage() {
 
           {/* Quick Actions */}
           <div className="card p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-medium text-white mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <a
                 href="/programs/new"
-                className="flex items-center gap-x-3 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
-                <PlayCircle className="h-6 w-6 text-primary-600" />
-                <span className="font-medium text-gray-900">Create Program</span>
+                <PlayCircle className="h-6 w-6 text-yellow-500 group-hover:text-yellow-400" />
+                <span className="font-medium text-gray-200 group-hover:text-white">Create Series</span>
               </a>
               <a
                 href="/lessons/new"
-                className="flex items-center gap-x-3 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
-                <BookOpen className="h-6 w-6 text-success-600" />
-                <span className="font-medium text-gray-900">Add Lesson</span>
+                <BookOpen className="h-6 w-6 text-success-500 group-hover:text-success-400" />
+                <span className="font-medium text-gray-200 group-hover:text-white">Add Episode</span>
               </a>
               <a
                 href="/topics"
-                className="flex items-center gap-x-3 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
-                <Users className="h-6 w-6 text-warning-600" />
-                <span className="font-medium text-gray-900">Manage Topics</span>
+                <Users className="h-6 w-6 text-warning-500 group-hover:text-warning-400" />
+                <span className="font-medium text-gray-200 group-hover:text-white">Manage Topics</span>
               </a>
               <a
                 href="/catalog"
-                className="flex items-center gap-x-3 rounded-lg border border-gray-300 p-4 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-x-3 rounded-lg border border-slate-700 p-4 hover:bg-slate-800 transition-colors group"
               >
-                <Eye className="h-6 w-6 text-gray-600" />
-                <span className="font-medium text-gray-900">View Catalog</span>
+                <Eye className="h-6 w-6 text-gray-400 group-hover:text-gray-300" />
+                <span className="font-medium text-gray-200 group-hover:text-white">View Catalog</span>
               </a>
             </div>
           </div>

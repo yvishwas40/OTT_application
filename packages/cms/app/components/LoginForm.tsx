@@ -37,7 +37,7 @@ export function LoginForm() {
     <div className="card p-8">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
             Email Address
           </label>
           <div className="relative">
@@ -55,7 +55,7 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
             Password
           </label>
           <div className="relative">
@@ -80,7 +80,7 @@ export function LoginForm() {
         </div>
 
         {error && (
-          <div className="flex items-center space-x-2 text-error-600 bg-error-50 p-3 rounded-lg">
+          <div className="flex items-center space-x-2 text-red-400 bg-red-900/30 p-3 rounded-lg border border-red-900/50">
             <AlertCircle className="h-5 w-5" />
             <span className="text-sm">{error}</span>
           </div>
@@ -95,8 +95,8 @@ export function LoginForm() {
         </button>
 
         <div className="text-center">
-          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
-            <p className="font-medium mb-1">Demo Credentials:</p>
+          <div className="text-sm text-gray-400 bg-slate-800 p-3 rounded-lg border border-slate-700">
+            <p className="font-medium mb-1 text-gray-300">Demo Credentials:</p>
             <p>Admin: admin@example.com / admin123</p>
             <p>Editor: editor@example.com / editor123</p>
           </div>

@@ -1,4 +1,5 @@
-FROM node:18-alpine
+FROM node:18-bullseye-slim
+
 
 WORKDIR /app
 
@@ -26,4 +27,4 @@ RUN npm prune --omit=dev
 EXPOSE 3000
 
 # 8. Run compiled app
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/src/main.js"]

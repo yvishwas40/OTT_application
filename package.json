@@ -2,6 +2,9 @@
   "name": "ott-cms-system",
   "version": "1.0.0",
   "description": "Production-grade OTT Content Management System",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "concurrently \"npm run api:dev\" \"npm run cms:dev\" \"npm run worker:dev\"",
     "api:dev": "cd packages/api && npm run start:dev",
@@ -10,8 +13,8 @@
     "build": "npm run api:build && npm run cms:build",
     "api:build": "cd packages/api && npm run build",
     "cms:build": "cd packages/cms && npm run build",
-    "db:migrate": "cd packages/api && npx prisma migrate dev",
-    "db:seed": "cd packages/api && npx tsx prisma/seed.ts",
+    "db:migrate": "cd packages/api && npx prisma migrate deploy",
+    "db:seed": "cd packages/api && npx prisma db seed",
     "docker:up": "docker-compose up --build",
     "docker:down": "docker-compose down"
   },
@@ -19,10 +22,9 @@
     "packages/*"
   ],
   "devDependencies": {
+    "@types/node": "^25.0.6",
     "concurrently": "^8.2.2",
-    "prisma": "^7.2.0"
-  },
-  "dependencies": {
-    "@prisma/client": "^7.2.0"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

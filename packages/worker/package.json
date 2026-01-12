@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "OTT CMS Background Worker",
   "main": "dist/index.js",
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",

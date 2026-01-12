@@ -23,10 +23,10 @@ export default function HomePage() {
 
   if (!mounted || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-4" />
-          <p className="text-gray-600">Loading...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-yellow-500 mx-auto mb-4" />
+          <p className="text-gray-400">Loading...</p>
         </div>
       </div>
     );
@@ -37,11 +37,11 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-blue-100">
+    <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <div className="max-w-md w-full space-y-8 p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">OTT CMS</h1>
-          <p className="text-gray-600">Content Management System</p>
+          <h1 className="text-3xl font-bold text-yellow-500 mb-2">Chai Shorts CMS</h1>
+          <p className="text-gray-400">Series & Episode Management</p>
         </div>
         <LoginForm />
       </div>
