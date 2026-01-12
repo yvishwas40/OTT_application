@@ -4,11 +4,9 @@
   "description": "OTT CMS Backend API",
   "type": "commonjs",
   "main": "dist/src/main.js",
-
   "prisma": {
-  "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts"
   },
-
   "scripts": {
     "build": "nest build",
     "start": "nest start",
@@ -21,7 +19,6 @@
     "db:deploy": "prisma migrate deploy",
     "db:studio": "prisma studio"
   },
-
   "dependencies": {
     "@nestjs/common": "^10.3.0",
     "@nestjs/core": "^10.3.0",
@@ -34,6 +31,7 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -41,10 +39,9 @@
     "pg": "^8.16.3",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "uuid": "^9.0.1",
-    "tsx": "^4.7.0"
+    "tsx": "^4.7.0",
+    "uuid": "^9.0.1"
   },
-
   "devDependencies": {
     "@nestjs/cli": "^10.2.1",
     "@nestjs/schematics": "^10.0.3",
